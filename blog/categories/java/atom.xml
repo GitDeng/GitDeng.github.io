@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Java | My Octopress Blog]]></title>
+  <title><![CDATA[Category: Java | 程序员笔记]]></title>
   <link href="http://gitdeng.github.io/blog/categories/java/atom.xml" rel="self"/>
   <link href="http://gitdeng.github.io/"/>
-  <updated>2015-07-15T15:34:41+08:00</updated>
+  <updated>2015-07-15T15:47:53+08:00</updated>
   <id>http://gitdeng.github.io/</id>
   <author>
-    <name><![CDATA[Your Name]]></name>
+    <name><![CDATA[程序员笔记]]></name>
     
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
