@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: 返回参数 | My Octopress Blog]]></title>
+  <link href="http://gitdeng.github.io/blog/categories/fan-hui-can-shu/atom.xml" rel="self"/>
+  <link href="http://gitdeng.github.io/"/>
+  <updated>2015-07-15T15:32:00+08:00</updated>
+  <id>http://gitdeng.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[获取Activity的返回参数]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/08/Get-the-return-parameter-of-Activity/"/>
+    <updated>2015-07-08T16:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/08/Get-the-return-parameter-of-Activity</id>
+    <content type="html"><![CDATA[<h2>1 MainActivity</h2>
+
+<pre><code>    private TextView textView;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        textView = (TextView) findViewById(R.id.textView);//获取Activity返回的数据
+
+        findViewById(R.id.btnStartAty).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(MainActivity.this,TheAty.class);
+//                startActivity(i);
+                startActivityForResult(i,0);//只有通过此种方法才能够接收带参数的Activity，其中0是请求代码
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        textView.setText("另一个Activity返回的数据是："+data.getStringExtra("data"));
+    }
+</code></pre>
+
+<h2>1 activity_main.xml</h2>
+
+<pre><code>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    tools:context=".MainActivity"&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="启动另一个Activity"
+        android:id="@+id/btnStartAty" /&gt;
+
+    &lt;TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Text"
+        android:id="@+id/textView" /&gt;
+
+&lt;/LinearLayout&gt;
+</code></pre>
+
+<h2>2 TheAty</h2>
+
+<pre><code>    private EditText editText;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_the_aty);
+        tv = (TextView) findViewById(R.id.tv);
+
+        editText = (EditText) findViewById(R.id.editText);
+
+        Intent i = getIntent();
+
+        findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {//设置按钮动作
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent();
+                i.putExtra("data",editText.getText().toString());
+                setResult(1, i);//将editText中字符串作为结果传递
+                finish();//结束当前的Activity
+            }
+        });
+    }
+</code></pre>
+
+<h2>2 activity_the_aty.xml</h2>
+
+<pre><code>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    tools:context="cn.loverobots.sendargs.TheAty"&gt;
+
+    &lt;TextView android:text="@string/hello_world" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:id="@+id/tv"/&gt;
+
+    &lt;EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/editText" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Send Back"
+        android:id="@+id/button" /&gt;
+
+&lt;/LinearLayout&gt;
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>

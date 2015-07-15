@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Serializable | My Octopress Blog]]></title>
+  <link href="http://gitdeng.github.io/blog/categories/serializable/atom.xml" rel="self"/>
+  <link href="http://gitdeng.github.io/"/>
+  <updated>2015-07-15T15:32:00+08:00</updated>
+  <id>http://gitdeng.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Activity之间的值传递（实现Serializable）]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/08/Value-transfer-between-Activity-Serializable/"/>
+    <updated>2015-07-08T13:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/08/Value-transfer-between-Activity-Serializable</id>
+    <content type="html"><![CDATA[<h2>1 值对象</h2>
+
+<pre><code>package cn.loverobots.sendargs;
+import java.io.Serializable;
+public class User implements Serializable{
+    private String name;
+    private int age;
+    public void setName(String name) {
+        this.name = name;
+    }
+    public void setAge(int age) {
+        this.age = age;
+    }
+    public String getName() {
+        return name;
+    }
+    public int getAge() {
+        return age;
+    }
+    public User (String name,int age){
+        this.name = name;
+        this.age = age;
+    }
+}
+</code></pre>
+
+<h2>2 MainActivity</h2>
+
+<pre><code>    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        findViewById(R.id.btnStartAty).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(MainActivity.this,TheAty.class);
+                i.putExtra("user",new User("jackrobot",20));//传递值对象，同时对值对象进行初始化
+                startActivity(i);
+            }
+        });
+    }
+</code></pre>
+
+<h2>3 TheAty</h2>
+
+<pre><code>    private TextView tv;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_the_aty);
+        tv = (TextView) findViewById(R.id.tv);
+        Intent i = getIntent();
+        User user = (User) i.getSerializableExtra("user");//以Serializable的方式获取值对象
+        tv.setText(String.format("User info(name=%s , age=%d)",user.getName(),user.getAge()));
+    }
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>

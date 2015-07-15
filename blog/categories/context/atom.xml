@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Context | My Octopress Blog]]></title>
+  <link href="http://gitdeng.github.io/blog/categories/context/atom.xml" rel="self"/>
+  <link href="http://gitdeng.github.io/"/>
+  <updated>2015-07-15T15:32:00+08:00</updated>
+  <id>http://gitdeng.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Application的用途]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/12/Application-uses/"/>
+    <updated>2015-07-12T01:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/12/Application-uses</id>
+    <content type="html"><![CDATA[<h2>简  介</h2>
+
+<h3>1 Context的作用</h3>
+
+<p>访问全局信息的接口，例如访问文字、图片资源等。</p>
+
+<h3>2 Application的用途</h3>
+
+<p>Application用于多个组件之间进行数据的共享，对于同一个应用来说是唯一的。</p>
+
+<h2>代  码</h2>
+
+<h3>1 App(继承Application)</h3>
+
+<pre><code>package cn.loverobots.learncontext;
+import android.app.Application;
+public class App extends Application {
+    private String textData = "default";
+    public void setTextData(String textData) {
+        this.textData = textData;
+    }
+    public String getTextData() {
+        return textData;
+    }
+}
+</code></pre>
+
+<h3>2 Main1(Activity)</h3>
+
+<pre><code>package cn.loverobots.learncontext;
+
+import android.support.v7.app.ActionBarActivity;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+public class Main1 extends ActionBarActivity {
+    private TextView textView;
+    private EditText editText;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main1);//绑定视图main1
+//        textView = new TextView(this);
+////        textView.setText("Hello Android!");
+//        textView.setText(R.string.hello_world);
+//        setContentView(textView);
+//
+//        System.out.println(getResources().getText(R.string.hello_world));
+//        ImageView iv = new ImageView(this);
+//        iv.setImageResource(R.mipmap.ic_launcher);
+//        setContentView(iv);
+
+        textView = (TextView) findViewById(R.id.textView);
+        editText = (EditText) findViewById(R.id.editText);
+
+        textView.setText("共享的数据是："+getApp().getTextData());
+
+        findViewById(R.id.btnSaveData).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //获取Application里的信息并保存到全局Context里面
+                ((App)getApplicationContext()).setTextData(editText.getText().toString());
+                //设置显示文本对象显示的文本
+                textView.setText("共享的数据是："+editText.getText().toString());
+            }
+        });
+
+    }
+    /**
+     * 获取Application中默认的数据
+     * @return
+     */
+    public App getApp(){
+        return (App)getApplicationContext();
+    }
+}
+</code></pre>
+
+<h3>2 Main2.xml</h3>
+
+<pre><code>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"&gt;
+
+    &lt;TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Text"
+        android:id="@+id/textView" /&gt;
+
+    &lt;EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/editText" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="保存"
+        android:id="@+id/btnSaveData" /&gt;
+&lt;/LinearLayout&gt;
+</code></pre>
+
+<h3>3 Main2(Activity)</h3>
+
+<pre><code>package cn.loverobots.learncontext;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.TextView;
+
+public class Main2 extends Activity {
+    private TextView textView;
+    private EditText editText;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main2);//绑定视图main2
+
+        textView = (TextView) findViewById(R.id.textView);
+        editText = (EditText) findViewById(R.id.editText);
+
+        textView.setText("共享的数据是："+getApp().getTextData());
+
+        findViewById(R.id.btnSaveData).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((App)getApplicationContext()).setTextData(editText.getText().toString());
+                textView.setText("共享的数据是："+editText.getText().toString());
+            }
+        });
+    }
+    public App getApp(){
+        return (App)getApplicationContext();
+    }
+}
+</code></pre>
+
+<h3>3 main2.xml</h3>
+
+<pre><code>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"&gt;
+
+    &lt;TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Text"
+        android:id="@+id/textView" /&gt;
+
+    &lt;EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/editText" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="保存"
+        android:id="@+id/btnSaveData" /&gt;
+&lt;/LinearLayout&gt;
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>

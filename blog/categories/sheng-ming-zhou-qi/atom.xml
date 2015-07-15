@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: 生命周期 | My Octopress Blog]]></title>
+  <link href="http://gitdeng.github.io/blog/categories/sheng-ming-zhou-qi/atom.xml" rel="self"/>
+  <link href="http://gitdeng.github.io/"/>
+  <updated>2015-07-15T15:32:00+08:00</updated>
+  <id>http://gitdeng.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Application的生命周期]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/12/Application-life-cycle/"/>
+    <updated>2015-07-12T02:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/12/Application-life-cycle</id>
+    <content type="html"><![CDATA[<h2>简  介</h2>
+
+<p>当一个应用程序中有多个Activity时，不管先启动哪个Activity，Application里的onCreate函数都会先执行，这样就可以利用Application进行初始化操作。</p>
+
+<h2>代  码</h2>
+
+<h3>1 App(继承Application)</h3>
+
+<pre><code>package cn.loverobots.learncontext;
+
+import android.app.Application;
+import android.content.res.Configuration;
+
+public class App extends Application {
+
+    private String textData = "default";
+    public void setTextData(String textData) {
+        this.textData = textData;
+    }
+    public String getTextData() {
+        return textData;
+    }
+
+    //Application中生命周期相关的函数
+    //在创建程序时执行
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        System.out.println("App onCreate");//当Application中onCreate执行时，会在控制台输出
+    }
+    //程序结束时执行
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+    }
+    //在低内存时执行
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+    }
+    //程序在进行内存清理时执行
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+    }
+    //程序配置发生改变时执行
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+    }
+}
+</code></pre>
+
+<h3>2 Main1(Activity)</h3>
+
+<pre><code>package cn.loverobots.learncontext;
+
+import android.support.v7.app.ActionBarActivity;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+
+public class Main1 extends ActionBarActivity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        System.out.println("Main1 onCreate");//当Main1的onCreate函数执行时会在控制台输出
+}
+</code></pre>
+
+<h3>3 Main2(Activity)</h3>
+
+<pre><code>package cn.loverobots.learncontext;
+
+import android.support.v7.app.ActionBarActivity;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+
+public class Main2 extends ActionBarActivity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        System.out.println("Main2 onCreate");
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android中Activity的生命周期]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/08/Activity-life-cycle/"/>
+    <updated>2015-07-08T06:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/08/Activity-life-cycle</id>
+    <content type="html"><![CDATA[<h2>官方文档说明图</h2>
+
+<p><img src="http://www.loverobots.cn/wp-content/uploads/2015/07/activity_lifecycle-00.jpg" alt="Activity的生命周期" /></p>
+]]></content>
+  </entry>
+  
+</feed>

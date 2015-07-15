@@ -1,0 +1,319 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Activity之间的值传递（实现Serializable） - My Octopress Blog</title>
+  <meta name="author" content="Your Name">
+
+  
+  <meta name="description" content="1 值对象 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+package cn.loverobots.sendargs;
+import java.io.Serializable;
+public class User &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://gitdeng.github.io/blog/2015/07/08/Value-transfer-between-Activity-Serializable/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="My Octopress Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">My Octopress Blog</a></h1>
+  
+    <h2>A blogging framework for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="gitdeng.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Activity之间的值传递（实现Serializable）</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-07-08T13:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>8</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>1:39 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2>1 值对象</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.sendargs;
+</span><span class='line'>import java.io.Serializable;
+</span><span class='line'>public class User implements Serializable{
+</span><span class='line'>    private String name;
+</span><span class='line'>    private int age;
+</span><span class='line'>    public void setName(String name) {
+</span><span class='line'>        this.name = name;
+</span><span class='line'>    }
+</span><span class='line'>    public void setAge(int age) {
+</span><span class='line'>        this.age = age;
+</span><span class='line'>    }
+</span><span class='line'>    public String getName() {
+</span><span class='line'>        return name;
+</span><span class='line'>    }
+</span><span class='line'>    public int getAge() {
+</span><span class='line'>        return age;
+</span><span class='line'>    }
+</span><span class='line'>    public User (String name,int age){
+</span><span class='line'>        this.name = name;
+</span><span class='line'>        this.age = age;
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>2 MainActivity</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>@Override
+</span><span class='line'>protected void onCreate(Bundle savedInstanceState) {
+</span><span class='line'>    super.onCreate(savedInstanceState);
+</span><span class='line'>    setContentView(R.layout.activity_main);
+</span><span class='line'>
+</span><span class='line'>    findViewById(R.id.btnStartAty).setOnClickListener(new View.OnClickListener() {
+</span><span class='line'>        @Override
+</span><span class='line'>        public void onClick(View v) {
+</span><span class='line'>            Intent i = new Intent(MainActivity.this,TheAty.class);
+</span><span class='line'>            i.putExtra("user",new User("jackrobot",20));//传递值对象，同时对值对象进行初始化
+</span><span class='line'>            startActivity(i);
+</span><span class='line'>        }
+</span><span class='line'>    });
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>3 TheAty</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>private TextView tv;
+</span><span class='line'>@Override
+</span><span class='line'>protected void onCreate(Bundle savedInstanceState) {
+</span><span class='line'>    super.onCreate(savedInstanceState);
+</span><span class='line'>    setContentView(R.layout.activity_the_aty);
+</span><span class='line'>    tv = (TextView) findViewById(R.id.tv);
+</span><span class='line'>    Intent i = getIntent();
+</span><span class='line'>    User user = (User) i.getSerializableExtra("user");//以Serializable的方式获取值对象
+</span><span class='line'>    tv.setText(String.format("User info(name=%s , age=%d)",user.getName(),user.getAge()));
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Your Name</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-07-08T13:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>8</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>1:39 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/activity/'>activity</a>, <a class='category' href='/blog/categories/android/'>android</a>, <a class='category' href='/blog/categories/android-basic/'>android_basic</a>, <a class='category' href='/blog/categories/serializable/'>serializable</a>, <a class='category' href='/blog/categories/zhi-chuan-di/'>值传递</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/07/08/Simple-data-and-packet-transfer-between-Activity/" title="Previous Post: Activity之间的简单数据及数据包传递">&laquo; Activity之间的简单数据及数据包传递</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2015/07/08/Value-transfer-between-Activity-Parcelable/" title="Next Post: Activity之间的值传递（实现Parcelable）">Activity之间的值传递（实现Parcelable） &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/07/14/Service-is-bound-to-communicate-how-to-listen-to-the-internal-state-of-the-Service/">绑定Service进行通信（如何侦听Service的内部状态）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/07/13/Bind-Service-and-communicate-via-Binder/">绑定Service通信（Binder方式）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/07/13/Start-Service-and-transfer-data/">启动Service并传递数据</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/07/13/Service-Android/">认识Android Service</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/07/12/Application-life-cycle/">Application的生命周期</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Your Name -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

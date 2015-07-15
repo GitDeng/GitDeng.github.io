@@ -1,0 +1,578 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Activity | My Octopress Blog]]></title>
+  <link href="http://gitdeng.github.io/blog/categories/activity/atom.xml" rel="self"/>
+  <link href="http://gitdeng.github.io/"/>
+  <updated>2015-07-15T15:32:00+08:00</updated>
+  <id>http://gitdeng.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[显示Intent与隐式Intent]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/10/Display-and-implicit-Intent/"/>
+    <updated>2015-07-10T02:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/10/Display-and-implicit-Intent</id>
+    <content type="html"><![CDATA[<h2>显示Intent</h2>
+
+<p>即采用指定类的方式。
+<code>
+    findViewById(R.id.btnStartMyAty).setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            startActivity(new Intent(MainActivity.this,MyAty.class));
+        }
+    });
+</code></p>
+
+<h2>隐式Intent</h2>
+
+<p>即采用指定字符串调用的方式。</p>
+
+<h3>1 首先要在AndroidManifest.xml文件中指定对应字符串</h3>
+
+<pre><code>    &lt;!-- exported的值默认为true，其它应用程序是可以直接访问的，指定为false，反之 --&gt;
+    &lt;activity android:name=".MyAty" android:exported="false"&gt;
+        &lt;intent-filter&gt;
+            &lt;!-- 指定值为DEFAULT，则intent-filter的行为方式为Activity --&gt;
+            &lt;category android:name="android.intent.category.DEFAULT"/&gt;
+            &lt;!-- 指定启动字符串，其中约定成俗的字符串格式为：包名.intent.action.类名 --&gt;
+            &lt;action android:name="cn.loverobots.learnintent.intent.action.MyAty"/&gt;
+        &lt;/intent-filter&gt;
+    &lt;/activity&gt;
+</code></pre>
+
+<h3>2 为了避免反复输入冗长的字符串，一般在被调用类中创建一个静态常量保存字符串</h3>
+
+<pre><code>public class MyAty extends Activity {
+    //在类中创建静态常量ACTION，并赋值为启动字符串，方便其它Activity调用
+    public static final String ACTION = "cn.loverobots.learnintent.intent.action.MyAty";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.myaty);//绑定myaty.xml视图文件
+    }
+}
+</code></pre>
+
+<h3>3 隐式Intent方式（程序LearnIntent中MainActivity.java调用）</h3>
+
+<pre><code>    findViewById(R.id.btnStartMyAty).setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            //这种启动方法默认可以跨应用程序启动里面的Activity
+            startActivity(new Intent(MyAty.ACTION));
+        }
+    });
+</code></pre>
+
+<h3>4 由于禁止跨程序调用（android:exported=&ldquo;false"），则需要在想要调用的程序中（另一个程序app1中MainActivity.java）捕获异常。</h3>
+
+<pre><code>    findViewById(R.id.btnStartMyAty).setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            try {//由于不确定此字符串是否可调用，所以需要捕获异常
+                startActivity(new Intent("cn.loverobots.learnintent.intent.action.MyAty"));
+            }catch(Exception e){
+                Toast.makeText(MainActivity.this,"无法启动指定的Activity",Toast.LENGTH_SHORT).show();
+            }
+        }
+    });
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[手动创建Activity的过程]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/10/Manually-create-Activity/"/>
+    <updated>2015-07-10T01:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/10/Manually-create-Activity</id>
+    <content type="html"><![CDATA[<h2>1 创建一个类（MyAty.java）</h2>
+
+<pre><code>package cn.loverobots.learnintent;
+
+import android.app.Activity;
+import android.os.Bundle;
+
+public class MyAty extends Activity {//继承Activity类
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {//重写onCreate方法
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.myaty);//绑定myaty.xml视图文件
+    }
+}
+</code></pre>
+
+<h2>2 创建视图文件（myaty.xml）</h2>
+
+<pre><code>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"&gt;
+
+    &lt;TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="这是MyAty"
+        android:id="@+id/textMyAty" /&gt;
+
+&lt;/LinearLayout&gt;
+</code></pre>
+
+<h3>3 在AndroidManifest.xml配置文件中注册新建的Activity</h3>
+
+<pre><code>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="cn.loverobots.learnintent" &gt;
+
+    &lt;application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" &gt; 
+        &lt;activity
+            android:name=".MainActivity"
+            android:label="@string/app_name" &gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name="android.intent.action.MAIN" /&gt;
+                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/activity&gt;
+        &lt;!-- 注册MyAty类，其中前面的“.”符号，实际上是用来与package连接的，即MyAty类的完整地址是“cn.loverobots.learnintent.MyAty” --&gt;
+        &lt;activity android:name=".MyAty" /&gt;
+    &lt;/application&gt;
+&lt;/manifest&gt;
+</code></pre>
+
+<h3>4 测试新建Activity是否成功</h3>
+
+<h4>4.1 MainActivity.java</h4>
+
+<pre><code>    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        findViewById(R.id.btnStartMyAty).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this,MyAty.class));//显示Intent
+            }
+        });
+    }
+</code></pre>
+
+<h4>4.2 activity_main.xml</h4>
+
+<pre><code>&lt;LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    tools:context=".MainActivity"&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="启动MyAty"
+        android:id="@+id/btnStartMyAty" /&gt;
+
+&lt;/LinearLayout&gt;
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android中Activity启动模式]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/09/Activity-Android-startup-mode/"/>
+    <updated>2015-07-09T12:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/09/Activity-Android-startup-mode</id>
+    <content type="html"><![CDATA[<h1>Activity共分为四种启动模式</h1>
+
+<h2>启动模式可以在AndroidManifest.xml中进行配置</h2>
+
+<pre><code>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="cn.loverobots.launchmode" &gt;
+    &lt;application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" &gt;
+        &lt;!-- launchMode分为四种模式：standard,singleTop,singleTask,singleInstance --&gt;
+        &lt;activity
+            android:name=".MainActivity"
+            android:label="@string/app_name"
+            android:launchMode="singleInstance" &gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name="android.intent.action.MAIN" /&gt;
+                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/activity&gt;
+        &lt;activity
+            android:name=".BAty"
+            android:label="@string/title_activity_baty"
+            android:launchMode="singleInstance" &gt;
+        &lt;/activity&gt;
+    &lt;/application&gt;
+&lt;/manifest&gt;
+</code></pre>
+
+<p>*同一个文件中的ID不能一样，不同文件之间的ID可以一样</p>
+
+<h3>1 Standard模式</h3>
+
+<p>即标准启动模式，每次启动当前Activity，都会创建新的实例。</p>
+
+<h3>2 SingleTop模式</h3>
+
+<p>如果当前Activity处于栈顶不会创建实例，如果当前Activity不处于栈顶，则会创建新的实例。</p>
+
+<h3>3 SingleTask模式</h3>
+
+<p>SingleTask启动模式下，只会创建一个当前Activity的实例A。当从此Activity实例打开另一个Activity实例B，并在B中打开最开始的Activity时，不会创建新实例，而会回到最开始的第一个A实例，再次按后退按钮则会直接退出当前程序。</p>
+
+<h3>4 SingleInstance模式</h3>
+
+<p>SingleInstance模式下，是独立的一个栈，即一个栈中只会存在一个Activity。</p>
+
+<h2>示 例</h2>
+
+<h3>1 MainActivity.java</h3>
+
+<pre><code>    private TextView tv;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        tv = (TextView) findViewById(R.id.tv);
+        tv.setText(String.format("TaskID:%d\nCurrent Activity ID:%s",getTaskId(),toString()));
+
+        findViewById(R.id.btnMainActivity).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, MainActivity.class));
+            }
+        });
+
+        findViewById(R.id.btnBAty).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this,BAty.class));
+            }
+        });
+    }
+</code></pre>
+
+<h3>1 activity_main.xml</h3>
+
+<pre><code>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    tools:context=".MainActivity"&gt;
+
+    &lt;TextView
+        android:id="@+id/tv"
+        android:text="@string/hello_world"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" /&gt;
+
+    &lt;Button
+        android:textAllCaps="false"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="启动MainActivity"
+        android:id="@+id/btnMainActivity" /&gt;
+
+    &lt;Button
+        android:textAllCaps="false"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="启动BAty"
+        android:id="@+id/btnBAty" /&gt;
+
+&lt;/LinearLayout&gt;
+</code></pre>
+
+<h3>2 BAty.java</h3>
+
+<pre><code>    private TextView tv;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_baty);
+
+        tv = (TextView) findViewById(R.id.tv);
+        tv.setText(String.format("TaskID:%d\nCurrent Activity ID:%s",getTaskId(),toString()));
+
+        findViewById(R.id.btnMainActivity).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(BAty.this, MainActivity.class));
+            }
+        });
+
+        findViewById(R.id.btnBAty).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(BAty.this, BAty.class));
+            }
+        });
+    }
+</code></pre>
+
+<h3>2 activity_baty.xml</h3>
+
+<pre><code>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    tools:context="cn.loverobots.launchmode.BAty"&gt;
+
+    &lt;TextView
+        android:id="@+id/tv"
+        android:text="@string/hello_world"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" /&gt;
+
+    &lt;Button
+        android:textAllCaps="false"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="启动MainActivity"
+        android:id="@+id/btnMainActivity" /&gt;
+
+    &lt;Button
+        android:textAllCaps="false"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="启动BAty"
+        android:id="@+id/btnBAty" /&gt;
+
+&lt;/LinearLayout&gt;
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[获取Activity的返回参数]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/08/Get-the-return-parameter-of-Activity/"/>
+    <updated>2015-07-08T16:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/08/Get-the-return-parameter-of-Activity</id>
+    <content type="html"><![CDATA[<h2>1 MainActivity</h2>
+
+<pre><code>    private TextView textView;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        textView = (TextView) findViewById(R.id.textView);//获取Activity返回的数据
+
+        findViewById(R.id.btnStartAty).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(MainActivity.this,TheAty.class);
+//                startActivity(i);
+                startActivityForResult(i,0);//只有通过此种方法才能够接收带参数的Activity，其中0是请求代码
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        textView.setText("另一个Activity返回的数据是："+data.getStringExtra("data"));
+    }
+</code></pre>
+
+<h2>1 activity_main.xml</h2>
+
+<pre><code>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    tools:context=".MainActivity"&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="启动另一个Activity"
+        android:id="@+id/btnStartAty" /&gt;
+
+    &lt;TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Text"
+        android:id="@+id/textView" /&gt;
+
+&lt;/LinearLayout&gt;
+</code></pre>
+
+<h2>2 TheAty</h2>
+
+<pre><code>    private EditText editText;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_the_aty);
+        tv = (TextView) findViewById(R.id.tv);
+
+        editText = (EditText) findViewById(R.id.editText);
+
+        Intent i = getIntent();
+
+        findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {//设置按钮动作
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent();
+                i.putExtra("data",editText.getText().toString());
+                setResult(1, i);//将editText中字符串作为结果传递
+                finish();//结束当前的Activity
+            }
+        });
+    }
+</code></pre>
+
+<h2>2 activity_the_aty.xml</h2>
+
+<pre><code>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    tools:context="cn.loverobots.sendargs.TheAty"&gt;
+
+    &lt;TextView android:text="@string/hello_world" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:id="@+id/tv"/&gt;
+
+    &lt;EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/editText" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Send Back"
+        android:id="@+id/button" /&gt;
+
+&lt;/LinearLayout&gt;
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Activity之间的值传递（实现Parcelable）]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/08/Value-transfer-between-Activity-Parcelable/"/>
+    <updated>2015-07-08T14:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/08/Value-transfer-between-Activity-Parcelable</id>
+    <content type="html"><![CDATA[<h2>1 值对象</h2>
+
+<pre><code>public class User implements Parcelable{
+    private String name;
+    private int age;
+    public void setName(String name) {
+        this.name = name;
+    }
+    public void setAge(int age) {
+        this.age = age;
+    }
+    public String getName() {
+        return name;
+    }
+    public int getAge() {
+        return age;
+    }
+    public User (String name,int age){
+        this.name = name;
+        this.age = age;
+    }
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        //向目标手动写数据
+        dest.writeString(getName());
+        dest.writeInt(getAge());
+    }
+    public static final Creator&lt;User&gt; CREATOR = new Creator&lt;User&gt;() {
+        @Override
+        public User createFromParcel(Parcel source) {
+            return new User(source.readString(),source.readInt());
+        }
+        @Override
+        public User[] newArray(int size) {
+            return new User[size];
+        }
+    };
+}
+</code></pre>
+
+<h2>2 MainActivity</h2>
+
+<pre><code>    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        findViewById(R.id.btnStartAty).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(MainActivity.this,TheAty.class);
+                i.putExtra("user",new User("jackrobot",20));//传递值对象，同时对值对象进行初始化
+                startActivity(i);
+            }
+        });
+    }
+</code></pre>
+
+<h2>3 TheAty</h2>
+
+<pre><code>    private TextView tv;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_the_aty);
+        tv = (TextView) findViewById(R.id.tv);
+        Intent i = getIntent();
+        User user = i.getParcelableExtra("user");//以Parcelable的方式获取值对象
+        tv.setText(String.format("User info(name=%s , age=%d)",user.getName(),user.getAge()));
+    }
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,843 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Service | My Octopress Blog]]></title>
+  <link href="http://gitdeng.github.io/blog/categories/service/atom.xml" rel="self"/>
+  <link href="http://gitdeng.github.io/"/>
+  <updated>2015-07-15T15:32:00+08:00</updated>
+  <id>http://gitdeng.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[绑定Service进行通信（如何侦听Service的内部状态）]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/14/Service-is-bound-to-communicate-how-to-listen-to-the-internal-state-of-the-Service/"/>
+    <updated>2015-07-14T00:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/14/Service-is-bound-to-communicate-how-to-listen-to-the-internal-state-of-the-Service</id>
+    <content type="html"><![CDATA[<p>通过回调机制实现。当内部数据发生改变时，通知外部进行数据修改。</p>
+
+<h2>示例代码</h2>
+
+<h3>1 MainActivity（继承Activity，并实现View.OnClickListener, ServiceConnection）</h3>
+
+<pre><code>    package cn.loverobots.connectservice;
+
+    import android.content.ComponentName;
+    import android.content.Context;
+    import android.content.Intent;
+    import android.content.ServiceConnection;
+    import android.os.Handler;
+    import android.os.IBinder;
+    import android.os.Message;
+    import android.os.Bundle;
+    import android.support.v7.app.AppCompatActivity;
+    import android.view.View;
+    import android.widget.EditText;
+    import android.widget.TextView;
+
+    public class MainActivity extends AppCompatActivity implements View.OnClickListener, ServiceConnection {
+
+        private EditText editText;
+        private Intent intent;
+        private MyService.Binder binder = null;
+        //步骤1
+        private TextView textViewOut;
+
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            setContentView(R.layout.activity_main);
+            editText = (EditText) findViewById(R.id.editText);
+            textViewOut = (TextView) findViewById(R.id.textViewOut);
+            findViewById(R.id.btnStartService).setOnClickListener(this);
+            findViewById(R.id.btnStopService).setOnClickListener(this);
+            findViewById(R.id.btnBindService).setOnClickListener(this);
+            findViewById(R.id.btnUnbindService).setOnClickListener(this);
+            findViewById(R.id.btnSyncData).setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            switch (v.getId()){
+                case R.id.btnStartService:
+                    System.out.println("启动服务");
+                    intent = new Intent(this,MyService.class);
+                    //传递名为“etData”的字符串类型的数据
+                    intent.putExtra("etData", editText.getText().toString());
+                    startService(intent);
+                    break;
+                case R.id.btnStopService:
+                    System.out.println("停止服务");
+                    stopService(new Intent(this,MyService.class));
+                    break;
+                case R.id.btnBindService:
+                    bindService(new Intent(this,MyService.class),this, Context.BIND_AUTO_CREATE);
+                    break;
+                case R.id.btnUnbindService:
+                    unbindService(this);
+                    break;
+                case R.id.btnSyncData:
+                    if(binder!=null){
+                        binder.setData(editText.getText().toString());
+                    }
+                    break;
+            }
+        }
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            //接收来自MyService的Binder中的数据
+            binder = (MyService.Binder) service;
+            //步骤7
+            binder.getService().setCallBack(new MyService.CallBack() {
+                @Override
+                public void onDataChange(String data) {
+                    //textViewOut.setText(data);
+                    //此处不能直接写,因为Android中有一个安全机制，即UI线程不允许其它辅线程直接修改UI线程的资源
+                    //步骤9
+                    Message msg = new Message();
+                    Bundle bundle = new Bundle();
+                    bundle.putString("data",data);
+                    msg.setData(bundle);
+                    handler.sendMessage(msg);
+                }
+            });
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+        //步骤8
+        private Handler handler = new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                //步骤10
+                textViewOut.setText(msg.getData().getString("data"));
+            }
+        };
+    }
+</code></pre>
+
+<h3>2 MyService(继承Service)</h3>
+
+<pre><code>    package cn.loverobots.connectservice;
+
+    import android.app.Service;
+    import android.content.Intent;
+    import android.os.IBinder;
+
+    public class MyService extends Service {
+        private static boolean ServiceRunning = false;
+        private String etData = "默认文本";
+        public MyService() {
+        }
+
+        @Override
+        public IBinder onBind(Intent intent) {
+            return new Binder();
+        }
+        //创建一个Binder对象继承系统中的Binder类，并创建一个传递数据的方法setData
+        public class Binder extends android.os.Binder{
+            public void setData(String etData){
+                MyService.this.etData = etData;
+            }
+            //步骤6
+            public MyService getService(){
+                return MyService.this;
+            }
+        }
+
+        @Override
+        public int onStartCommand(Intent intent, int flags, int startId) {
+            etData = intent.getStringExtra("etData");
+            return super.onStartCommand(intent, flags, startId);
+        }
+
+        @Override
+        public void onCreate() {
+            super.onCreate();
+            System.out.println("服务创建");
+            ServiceRunning = true;
+            new Thread(){
+                @Override
+                public void run() {
+                    super.run();
+                    //步骤4
+                    int i = 0;
+                    while (ServiceRunning){
+                        i++;
+                        String str = i+"："+etData;
+                        System.out.println(str);
+                        //步骤5
+                        if(callBack!=null){
+                            callBack.onDataChange(str);
+                        }
+                        try {
+                            sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }.start();
+        }
+
+        @Override
+            public void onDestroy() {
+            super.onDestroy();
+            System.out.println("服务停止");
+            ServiceRunning = false;
+        }
+        //步骤3
+        private CallBack callBack = null;
+
+        public void setCallBack(CallBack callBack) {
+            this.callBack = callBack;
+        }
+
+        public CallBack getCallBack() {
+            return callBack;
+        }
+        //步骤2
+        public static interface CallBack{
+            void onDataChange(String data);
+        }
+    }
+</code></pre>
+
+<h3>3 activity_main.xml</h3>
+
+<pre><code>    &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+        android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:orientation="vertical"
+        tools:context=".MainActivity"&gt;
+
+        &lt;TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="内部输出至外部测试文本"
+            android:id="@+id/textViewOut" /&gt;
+
+        &lt;EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="默认文本"
+            android:id="@+id/editText" /&gt;
+
+        &lt;Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="启动服务"
+            android:id="@+id/btnStartService" /&gt;
+
+        &lt;Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="停止服务"
+            android:id="@+id/btnStopService" /&gt;
+
+        &lt;Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="绑定服务"
+            android:id="@+id/btnBindService" /&gt;
+
+        &lt;Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="解除绑定服务"
+            android:id="@+id/btnUnbindService" /&gt;
+
+        &lt;Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="同步数据"
+            android:id="@+id/btnSyncData" /&gt;
+    &lt;/LinearLayout&gt;
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[绑定Service通信（Binder方式）]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/13/Bind-Service-and-communicate-via-Binder/"/>
+    <updated>2015-07-13T04:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/13/Bind-Service-and-communicate-via-Binder</id>
+    <content type="html"><![CDATA[<p>绑定Service时，通过Binder方式进行数据传递，比通过启动Service的方式更方便也更高效。</p>
+
+<h2>示例代码</h2>
+
+<h3>1 MainActivity（继承Activity，实现View.OnClickListener, ServiceConnection接口）</h3>
+
+<pre><code>package cn.loverobots.connectservice;
+
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
+import android.support.v7.app.ActionBarActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.EditText;
+
+public class MainActivity extends ActionBarActivity implements View.OnClickListener, ServiceConnection {
+
+    private EditText editText;
+    private Intent intent;
+    private MyService.Binder binder = null;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        editText = (EditText) findViewById(R.id.editText);
+        findViewById(R.id.btnStartService).setOnClickListener(this);
+        findViewById(R.id.btnStopService).setOnClickListener(this);
+        findViewById(R.id.btnBindService).setOnClickListener(this);
+        findViewById(R.id.btnUnbindService).setOnClickListener(this);
+        findViewById(R.id.btnSyncData).setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.btnStartService:
+                System.out.println("启动服务");
+                intent = new Intent(this,MyService.class);
+                //传递名为“etData”的字符串类型的数据
+                intent.putExtra("etData", editText.getText().toString());
+                startService(intent);
+                break;
+            case R.id.btnStopService:
+                System.out.println("停止服务");
+                stopService(new Intent(this,MyService.class));
+                break;
+            case R.id.btnBindService:
+                bindService(new Intent(this,MyService.class),this, Context.BIND_AUTO_CREATE);
+                break;
+            case R.id.btnUnbindService:
+                unbindService(this);
+                break;
+            case R.id.btnSyncData:
+                if(binder!=null){
+                    binder.setData(editText.getText().toString());
+                }
+                break;
+        }
+    }
+
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder service) {
+        //接收来自MyService的Binder中的数据
+        binder = (MyService.Binder) service;
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+
+    }
+}
+</code></pre>
+
+<h3>2 MyService（继承Service）</h3>
+
+<pre><code>package cn.loverobots.connectservice;
+
+import android.app.Service;
+import android.content.Intent;
+import android.os.Binder;
+import android.os.IBinder;
+
+public class MyService extends Service {
+    private static boolean ServiceRunning = false;
+    private String etData = "默认文本";
+
+    public MyService() {
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return new Binder();
+    }
+    //创建一个Binder对象继承系统中的Binder类，并创建一个传递数据的方法setData
+    public class Binder extends android.os.Binder{
+        public void setData(String etData){
+            MyService.this.etData = etData;
+        }
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        etData = intent.getStringExtra("etData");
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        System.out.println("服务创建");
+        ServiceRunning = true;
+        new Thread(){
+            @Override
+            public void run() {
+                super.run();
+                while (ServiceRunning){
+                    System.out.println(etData);
+                    try {
+                        sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }.start();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        System.out.println("服务停止");
+        ServiceRunning = false;
+    }
+}
+</code></pre>
+
+<h3>3 activity_main.xml</h3>
+
+<pre><code>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    tools:context=".MainActivity"&gt;
+
+    &lt;EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="默认文本"
+        android:id="@+id/editText" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="启动服务"
+        android:id="@+id/btnStartService" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="停止服务"
+        android:id="@+id/btnStopService" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="绑定服务"
+        android:id="@+id/btnBindService" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="解除绑定服务"
+        android:id="@+id/btnUnbindService" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="同步数据"
+        android:id="@+id/btnSyncData" /&gt;
+&lt;/LinearLayout&gt;
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[启动Service并传递数据]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/13/Start-Service-and-transfer-data/"/>
+    <updated>2015-07-13T02:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/13/Start-Service-and-transfer-data</id>
+    <content type="html"><![CDATA[<h2>示例代码</h2>
+
+<h3>1 MainActivity（继承Activity,实现View.OnClickListener接口）</h3>
+
+<pre><code>package cn.loverobots.connectservice;
+
+import android.content.Intent;
+import android.support.v7.app.ActionBarActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.EditText;
+
+public class MainActivity extends ActionBarActivity implements View.OnClickListener {
+
+    private EditText editText;
+    private Intent intent;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        editText = (EditText) findViewById(R.id.editText);
+        findViewById(R.id.btnStartService).setOnClickListener(this);
+        findViewById(R.id.btnStopService).setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.btnStartService:
+                System.out.println("启动服务");
+                intent = new Intent(this,MyService.class);
+                //传递名为“etData”的字符串类型的数据
+                intent.putExtra("etData", editText.getText().toString());
+                startService(intent);
+                break;
+            case R.id.btnStopService:
+                System.out.println("停止服务");
+                stopService(new Intent(this,MyService.class));
+                break;
+        }
+    }
+}
+</code></pre>
+
+<h3>2 MyService（继承Service）</h3>
+
+<pre><code>package cn.loverobots.connectservice;
+
+import android.app.Service;
+import android.content.Intent;
+import android.os.Binder;
+import android.os.IBinder;
+
+public class MyService extends Service {
+    private static boolean ServiceRunning = false;
+    private String etData = "默认文本";
+
+    public MyService() {
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return new Binder();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        etData = intent.getStringExtra("etData");
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        System.out.println("服务创建");
+        ServiceRunning = true;
+        new Thread(){
+            @Override
+            public void run() {
+                super.run();
+                while (ServiceRunning){
+                    System.out.println(etData);
+                    try {
+                        sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }.start();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        System.out.println("服务停止");
+        ServiceRunning = false;
+    }
+}
+</code></pre>
+
+<h3>3 activity_main.xml</h3>
+
+<pre><code>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    tools:context=".MainActivity"&gt;
+
+    &lt;EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="默认文本"
+        android:id="@+id/editText" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="启动服务"
+        android:id="@+id/btnStartService" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="停止服务"
+        android:id="@+id/btnStopService" /&gt;
+&lt;/LinearLayout&gt;
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[认识Android Service]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/13/Service-Android/"/>
+    <updated>2015-07-13T01:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/13/Service-Android</id>
+    <content type="html"><![CDATA[<h2>1 使用Service</h2>
+
+<h3>使用场景</h3>
+
+<p>不需要有可以与用户交互的界面，只需要在后台一直运行，做一些事务的处理，比如说Socket超链接、Http的网络通信以及与服务器保持推送的一个链接。<br/>
+<strong>注意</strong>：Service实例在一个应用程序中只能有一个。</p>
+
+<h2>2 绑定Service</h2>
+
+<p>启动服务也可以通过绑定服务的方式启动。</p>
+
+<h2>3 使用与绑定Service示例代码</h2>
+
+<h3>3.1 MainActivity（继承Activity，实现View.OnClickListener, ServiceConnection）</h3>
+
+<pre><code>package cn.loverobots.learnservice;
+
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
+import android.support.v7.app.ActionBarActivity;
+import android.os.Bundle;
+import android.view.View;
+
+public class MainActivity extends ActionBarActivity implements View.OnClickListener, ServiceConnection {
+
+    private Intent intent;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        intent = new Intent(MainActivity.this,MyService.class);
+        //启动Service
+        findViewById(R.id.btnStartService).setOnClickListener(this);
+        //停止Service
+        findViewById(R.id.btnStopService).setOnClickListener(this);
+        //绑定Service
+        findViewById(R.id.btnBindService).setOnClickListener(this);
+        //解除绑定Service
+        findViewById(R.id.btnUnbindService).setOnClickListener(this);
+    }
+    //实现OnClickListener接口需要重写的方法
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.btnStartService:
+                startService(intent);
+                break;
+            case R.id.btnStopService:
+                stopService(intent);
+                break;
+            case R.id.btnBindService:
+                bindService(intent,this, Context.BIND_AUTO_CREATE);
+                break;
+            case R.id.btnUnbindService:
+                unbindService(this);
+                break;
+        }
+    }
+    //实现ServiceConnection接口需要重写的方法
+    //服务被绑定成功执行
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder service) {
+        System.out.println("Service Connected");
+    }
+    //实现ServiceConnection接口需要重写的方法
+    //服务解除绑定或者被杀掉时执行
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+
+    }
+}
+</code></pre>
+
+<h3>3.2 activity_main.xml</h3>
+
+<pre><code>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    tools:context=".MainActivity"&gt;
+
+    &lt;TextView android:text="@string/hello_world" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="启动服务"
+        android:id="@+id/btnStartService" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="停止服务"
+        android:id="@+id/btnStopService" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="绑定服务"
+        android:id="@+id/btnBindService" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="解除绑定服务"
+        android:id="@+id/btnUnbindService" /&gt;
+
+&lt;/LinearLayout&gt;
+</code></pre>
+
+<h3>3.3 MyService（继承Service）</h3>
+
+<pre><code>package cn.loverobots.learnservice;
+
+import android.app.Service;
+import android.content.Intent;
+import android.os.Binder;
+import android.os.IBinder;
+
+public class MyService extends Service {
+    public MyService() {
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        //返回一个实现了IBinder接口的对象
+        return new Binder();
+    }
+    //服务启动时所执行的命令示例
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                while (true) {
+                    System.out.println("服务正在运行...");
+                    try {
+                        sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }.start();
+
+        return super.onStartCommand(intent, flags, startId);
+    }
+}
+</code></pre>
+
+<h2>4 Service的生命周期</h2>
+
+<p>与Service生命周期相关的函数为onCreate和onDestroy两个函数，其规律如下。<br/>
+4.1 启动服务再绑定服务后，只能先解除绑定服务再停止服务才能真正停止掉服务。<br/>
+4.2 启动服务后，退出程序，服务不会停止；再次进入程序停止服务，服务才会停止。<br/>
+4.3 启动服务并绑定服务后，退出程序，也不会停止服务。需要解除绑定服务，并进行服务停止，才能真正停止服务。<br/>
+4.4 Service中onCreate函数只会在最开始时执行一次，之后反复执行启动服务，只会反复执行onStartCommand函数。</p>
+
+<h2>5 Service的停止与启动代码示例</h2>
+
+<h3>5.1 MyService（继承Service）</h3>
+
+<pre><code>package cn.loverobots.learnservice;
+
+import android.app.Service;
+import android.content.Intent;
+import android.os.Binder;
+import android.os.IBinder;
+
+public class MyService extends Service {
+    //控制服务运行的开关
+    private boolean serviceRunning = false;
+
+    public MyService() {
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        //返回一个实现了IBinder接口的对象
+        return new Binder();
+    }
+    //服务启动时所执行的命令示例
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        System.out.println("Service onStartCommand");
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        System.out.println("Service onCreate");
+        serviceRunning = true;
+        new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                while (serviceRunning) {
+                    System.out.println("服务正在运行...");
+                    try {
+                        sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }.start();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        System.out.println("Service onDestory");
+        serviceRunning = false;
+        System.out.println("服务停止运行！");
+    }
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: 显示intent | My Octopress Blog]]></title>
+  <link href="http://gitdeng.github.io/blog/categories/xian-shi-intent/atom.xml" rel="self"/>
+  <link href="http://gitdeng.github.io/"/>
+  <updated>2015-07-15T15:32:00+08:00</updated>
+  <id>http://gitdeng.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[显示Intent与隐式Intent]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/10/Display-and-implicit-Intent/"/>
+    <updated>2015-07-10T02:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/10/Display-and-implicit-Intent</id>
+    <content type="html"><![CDATA[<h2>显示Intent</h2>
+
+<p>即采用指定类的方式。
+<code>
+    findViewById(R.id.btnStartMyAty).setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            startActivity(new Intent(MainActivity.this,MyAty.class));
+        }
+    });
+</code></p>
+
+<h2>隐式Intent</h2>
+
+<p>即采用指定字符串调用的方式。</p>
+
+<h3>1 首先要在AndroidManifest.xml文件中指定对应字符串</h3>
+
+<pre><code>    &lt;!-- exported的值默认为true，其它应用程序是可以直接访问的，指定为false，反之 --&gt;
+    &lt;activity android:name=".MyAty" android:exported="false"&gt;
+        &lt;intent-filter&gt;
+            &lt;!-- 指定值为DEFAULT，则intent-filter的行为方式为Activity --&gt;
+            &lt;category android:name="android.intent.category.DEFAULT"/&gt;
+            &lt;!-- 指定启动字符串，其中约定成俗的字符串格式为：包名.intent.action.类名 --&gt;
+            &lt;action android:name="cn.loverobots.learnintent.intent.action.MyAty"/&gt;
+        &lt;/intent-filter&gt;
+    &lt;/activity&gt;
+</code></pre>
+
+<h3>2 为了避免反复输入冗长的字符串，一般在被调用类中创建一个静态常量保存字符串</h3>
+
+<pre><code>public class MyAty extends Activity {
+    //在类中创建静态常量ACTION，并赋值为启动字符串，方便其它Activity调用
+    public static final String ACTION = "cn.loverobots.learnintent.intent.action.MyAty";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.myaty);//绑定myaty.xml视图文件
+    }
+}
+</code></pre>
+
+<h3>3 隐式Intent方式（程序LearnIntent中MainActivity.java调用）</h3>
+
+<pre><code>    findViewById(R.id.btnStartMyAty).setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            //这种启动方法默认可以跨应用程序启动里面的Activity
+            startActivity(new Intent(MyAty.ACTION));
+        }
+    });
+</code></pre>
+
+<h3>4 由于禁止跨程序调用（android:exported=&ldquo;false"），则需要在想要调用的程序中（另一个程序app1中MainActivity.java）捕获异常。</h3>
+
+<pre><code>    findViewById(R.id.btnStartMyAty).setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            try {//由于不确定此字符串是否可调用，所以需要捕获异常
+                startActivity(new Intent("cn.loverobots.learnintent.intent.action.MyAty"));
+            }catch(Exception e){
+                Toast.makeText(MainActivity.this,"无法启动指定的Activity",Toast.LENGTH_SHORT).show();
+            }
+        }
+    });
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,428 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>My Octopress Blog</title>
+  <meta name="author" content="Your Name">
+
+  
+  <meta name="description" content="1 Nodejs的介绍 JS是脚本语言，脚本语言都需要一个解析器才能运行。对于写在HTML页面里的JS，浏览器充当了解析器的角色。而对于需要独立运行的JS，NodeJS就是一个解析器。 Node.js是建立在Chrome的JavaScript的运行时，可方便地构建快速，可扩展的网络应用程序的平台。 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://gitdeng.github.io/posts/3/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="My Octopress Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">My Octopress Blog</a></h1>
+  
+    <h2>A blogging framework for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="gitdeng.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div class="blog-index">
+  
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/07/Nodejs-profile/">认识Nodejs</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-07-07T10:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>10:39 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>1 Nodejs的介绍</h2>
+
+<p>JS是脚本语言，脚本语言都需要一个解析器才能运行。对于写在HTML页面里的JS，浏览器充当了解析器的角色。而对于需要独立运行的JS，NodeJS就是一个解析器。</p>
+
+<p>Node.js是建立在Chrome的JavaScript的运行时，可方便地构建快速，可扩展的网络应用程序的平台。Node.js使用事件驱动，非阻塞I/O模型，轻量、高效，可以完美地处理时时数据，运行在不同的设备上。</p>
+
+<p>每一种解析器都是一个运行环境，不但允许JS定义各种数据结构，进行各种计算，还允许JS使用运行环境提供的内置对象和方法做一些事情。例如运行在浏览器中的JS的用途是操作DOM，浏览器就提供了document之类的内置对象。而运行在Nodejs中的JS的用途是操作磁盘文件或搭建HTTP服务器，NodeJS就相应提供了fs、http等内置对象。</p>
+
+<h2>2 Nodejs使用领域</h2>
+
+<p>尽管存在一听说可以直接运行JS文件就觉得很酷的同学，但大多数同学在接触新东西时首先关心的是有啥用处，以及能带来啥价值。Nodejs的作者说，他创造NodeJS的目的是为了实现高性能Web服务器，他首先看重的是事件机制和异步IO模型的优越性，而不是JS。但是他需要选择一种编程语言实现他的想法，这种编程语言不能自带IO功能，并且需要能良好支持事件机制。JS没有自带IO功能，天生就用于处理浏览器中的 DOM事件，并且拥有一大群程序员，因此就成为了天然的选择。</p>
+
+<p>如他所愿，Nodejs在服务端活跃起来，出现了大批基于NodeJS的Web服务。而另一方面，NodeJS让前端众如获神器，终于可以让自己的能力覆盖范围跳出浏览器窗口，更大批的前端工具如雨后春笋。</p>
+
+<p>从<a href="https://github.com/joyent/node/wiki/Projects,-Applications,-and-Companies-Using-Node">Nodejs官方网站的企业登记页</a>来看，包括我们熟知的公司有LinkedIn, Yahoo, Paypal, eBay, Walmart，Groupon 还有很多的中小型公司，国内的公司如雪球、淘宝、网易、百度等也都有很多项目运行在Node.js之上。</p>
+
+<p>因此，对于前端而言，虽然不是人人都要拿NodeJS写一个服务器程序，但简单可至使用命令交互模式调试JS代码片段，复杂可至编写工具提升工作效率。</p>
+
+<h2>3 Nodejs的优势</h2>
+
+<h3>3.1 总的来看，Nodejs的优势如下</h3>
+
+<p>3.1.1 Nodejs基于Javascript语言，不用再单独新学一门陌生的语言，从而减低了学习的门槛。同时，Javascript语言在Web前端开发中至关重要，特别HTML5的应用必须要使用，所以前后台统一语言，不仅可以实现程序员的全栈开发，还可以统一公共类库，代码标准化。单凭这一点，Nodejs就已经赢得市场的青睐了。</p>
+
+<p>3.1.2 Nodejs并没有重新开发运行时环境，而是选择了目前最快的浏览器内核V8作为执行引擎，保证了Nodejs的性能和稳定性。</p>
+
+<p>3.1.3 Nodejs的开发非常高效，而且代码简单，得益于Nodejs的单线程机制。而Nodejs的另一个特点异步编程，让Nodejs处理IO密集型应用有了明显的优势。个人感觉，用Nodejs比Java做Web开发要高效10倍，比PHP的代码还要简单。</p>
+
+<p>3.1.4 Nodejs的社区在壮大，不仅包的数量在快速增加，而且包的质量也要明显好于其他语言的。很多明星级的包，都是简单而灵巧的，为了开发者的使用习惯而设计。常用到的工具包，如socket.io, moment.js, underscore.js, async.js, express.js, bower.js, grunt.js, forever.js&hellip;&hellip;</p>
+
+<h3>3.2 另外，ebay选择Nodejs的理由，可以归纳为以下4点：</h3>
+
+<p>3.2.1 动态语言：开发效率非常高，并有能力构建复杂系统，如ql.io。
+3.2.2 性能和I/O负载：Nodejs非常好的解决了IO密集的问题，通过异步IO来实现。
+3.2.3 连接的内存开销：每个Node.js进程可以支持超过12万活跃的连接，每个连接消耗大约2K的内存。
+3.2.4 操作性：实现了Nodejs对于内存堆栈的监控系统。</p>
+
+<h2>4 Nodejs不适合的领域</h2>
+
+<p>每一种语言或平台都有不擅长领域，对于Nodejs来说最不擅长的领域在于CPU和内存的编程操作。</p>
+
+<p>4.1 计算密集型应用，让Javascript和C去拼计算性能，估计是不可能赢的。</p>
+
+<p>4.2 内存控制，让Javascript和Java比较复杂数据类型定义，也是很困难的。因为Javascript的面向对象是基于JSON的，而Java是直接使用内存结构。所以，通过JSON序列化和反序列的过程控制内存，Javascript就已经输了。</p>
+
+<p>4.3 大内存的应用，由于V8引擎有内存设计的限制，32位环境中最大堆是1G，64位环境中最大堆也不到2G，如果要一次读入10G数据，对于Nodejs来说也无法实现。</p>
+
+<p>4.4 静态服务器，虽然Nodejs的优势在IO密集集应用，但是和Nginx的处理静态资源还是有很大的差距。</p>
+
+<p>4.5 不需要异步的应用：比如系统管理，自行化脚本等，还是Python更顺手，Nodejs的异步调用可能会给编程带来一些麻烦。</p>
+
+<p>*<a href="http://www.open-open.com/news/tags/Node.js">Nodejs学习资料</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/07/Git-profile/">认识Git</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-07-07T08:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>8:39 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>1 Git历史</h2>
+
+<p>同生活中的许多伟大事件一样，Git诞生于一个极富纷争大举创新的年代。Linux 内核开源项目有着为数众广的参与者。绝大多数的Linux内核维护工作都花在了提交补丁和保存归档的繁琐事务上（1991－2002年间）。到2002年，整个项目组开始启用分布式版本控制系统BitKeeper来管理和维护代码。</p>
+
+<p>到了 2005 年，开发BitKeeper的商业公司同Linux内核开源社区的合作关系结束，他们收回了免费使用BitKeeper的权力。这就迫使Linux开源社区（特别是Linux的缔造者Linus Torvalds）不得不吸取教训，只有开发一套属于自己的版本控制系统才不至于重蹈覆辙。他们对新的系统制订了若干目标：<br/>
+（1）速度。<br/>
+（2）简单的设计。<br/>
+（3）对非线性开发模式的强力支持（允许上千个并行开发的分支）。<br/>
+（4）完全分布式。<br/>
+（5）有能力高效管理类似 Linux 内核一样的超大规模项目（速度和数据量）。</p>
+
+<p>自诞生于2005年以来，Git日臻成熟完善，在高度易用的同时，仍然保留着初期设定的目标。它的速度飞快，极其适合管理大项目，它还有着令人难以置信的非线性分支管理系统，可以应付各种复杂的项目开发需求。</p>
+
+<h2>2 Git与SVN的对比</h2>
+
+<h3>2.1 版本控制系统分类</h3>
+
+<h4>2.1.1 本地版本控制系统</h4>
+
+<p>其中最流行的一种叫做 rcs，现今许多计算机系统上都还看得到它的踪影。甚至在流行的 Mac OS X 系统上安装了开发者工具包之后，也可以使用 rcs 命令。它的工作原理基本上就是保存并管理文件补丁（patch）。文件补丁是一种特定格式的文本文件，记录着对应文件修订前后的内容变化。所以，根据每次修订后的补丁，rcs 可以通过不断打补丁，计算出各个版本的文件内容。</p>
+
+<h4>2.1.2 集中式版本控制系统</h4>
+
+<p>接下来人们又遇到一个问题，如何让在不同系统上的开发者协同工作？于是，集中化的版本控制系统（ Centralized Version Control Systems，简称 CVCS ）应运而生。这类系统，诸如 CVS，Subversion 以及 Perforce 等，都有一个单一的集中管理的服务器，保存所有文件的修订版本，而协同工作的人们都通过客户端连到这台服务器，取出最新的文件或者提交更新。多年以来，这已成为版本控制系统的标准做法。</p>
+
+<p>事分两面，有好有坏。这么做最显而易见的缺点是中央服务器的单点故障。如果宕机一小时，那么在这一小时内，谁都无法提交更新，也就无法协同工作。要是中央服务器的磁盘发生故障，碰巧没做备份，或者备份不够及时，就会有丢失数据的风险。</p>
+
+<h4>2.1.3 分布式版本控制系统</h4>
+
+<p>于是分布式版本控制系统（ Distributed Version Control System，简称 DVCS ）面世了。在这类系统中，像 Git，Mercurial，Bazaar 以及 Darcs 等，客户端并不只提取最新版本的文件快照，而是把代码仓库完整地镜像下来。这么一来，任何一处协同工作用的服务器发生故障，事后都可以用任何一个镜像出来的本地仓库恢复。因为每一次的提取操作，实际上都是一次对代码仓库的完整备份。</p>
+
+<h3>2.2 Git相对于SVN的优势</h3>
+
+<p>2.2.1 Git是分布式的SCM，SVN是集中式。<br/>
+2.2.2 Git每个历史版本存储完整的文件，SVN存储文件差异。<br/>
+2.2.3 Git可离线完成大部分操作，SVN则相反。<br/>
+2.2.4 Git有着更优雅的分支和合并实现。<br/>
+2.2.5 Git有着更强的撤销修改和修改版本历史的能力。<br/>
+2.2.6 Git速度更快，效率更高。</p>
+
+<h2>3.为什么要学会使用Git</h2>
+
+<p>当今更多的开源项目迁移到了GitHub这类平台上面，要研究这些开源项目就必须学习Git。而且，现在越来越多的公司采用Git来进行版本控制，掌握Git可以提升求职竞争力。</p>
+
+<p>*<a href="http://git-scm.com/book/zh/v1">Git官方中文简体学习手册</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/06/svn-profile/">认识SVN</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-07-06T22:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>6</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>10:39 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>1 SVN的介绍</h2>
+
+<p>SVN是Subversion的简称，是一个开放源代码的版本控制系统，相较于RCS、CVS（现在已经不流行了），它采用了分支管理系统，它的设计目标就是取代CVS。互联网上很多版本控制服务已从CVS迁移到Subversion。平时我们在开发的过程中以及团队的配合中，SVN应用的特别多，所以我们要熟练的使用SVN开发分支、合并主干、处理分支。</p>
+
+<h3>1.1 SVN原理</h3>
+
+<p>通俗的理解是：<br/>
+（1）SVN有一条“主干”保存最新版本，不允许直接往上提交。<br/>
+（2）每个用户在使用前，都需要从主干上某个时间点拉下对应的一个“分支”。<br/>
+（3）当每个用户修改完成新版本准备提交时，需要检查主干上是否存在“其拉下分支后其他用户的新的提交”。如果有，则需要再次从最新节点处拉下新分支重新整合“提交”；如果没有，则可以直接“提交”。<br/>
+（4）同时，SVN中存在一个“tags”，它是每个用户提交上线关键点的“备份”，用于执行发现问题时的回滚等操作。</p>
+
+<h2>2 SVN和Git的比较</h2>
+
+<p>SVN基于文件夹的操作，Git是基于流式的操作。</p>
+
+<h2>3 SVN的安装</h2>
+
+<p>在Windows平台上多使用TortoiseSVN这款SVN工具。</p>
+
+<p>TortoiseSVN（俗称“小乌龟”）是Subversion版本控制系统的一个免费开源客户端，可以超越时间的管理文件和目录。文件保存在中央版本库，除了能记住文件和目录的每次修改以外，版本库非常像普通的文件服务器。你可以将文件恢复到过去的版本，并且可以通过检查历史知道数据做了哪些修改，谁做的修改。这就是为什么许多人将Subversion和版本控制系统看作一种“时间机器”。</p>
+
+<p><em><a href="http://tortoisesvn.net/">TortoiseSVN官方网站</a><br/>
+</em><a href="http://www.cnblogs.com/xilentz/archive/2010/05/06/1728945.html">TotoiseSVN的基本使用方法</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/05/MySQL-profile-profile/">认识MySQL</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-07-05T22:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>5</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>10:39 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>1 数据库的重要性</h2>
+
+<p>数据库技术是计算机科学技术中应用非常广泛的一个重要分支，现在，它已经成为IT世界里非常重要的技术基础，将来，数据库技术也应该不会消失，因为数据库是非常重要的东西，数据的容器当然也是非常重要的。</p>
+
+<h2>2 数据库的基本概念</h2>
+
+<p>数据库是一个有组织的、根据某种标准分类的数据集合。对于少量的信息，使用数据库保存的优势并不明显，但是当需要处理大量数据的时候，数据库的真正能力就体现出来了。比如说从成千上万条数据中检索符合指定条件的数据，对于数据库而言，是非常简单的事情。</p>
+
+<h2>3 MySQL数据库介绍</h2>
+
+<p>MySql是一个小型数据库管理系统，开发者为瑞典MySQL AB公司。这个公司在2008年被Sun公司收购，而2009年SUN公司又被Oracle收购。所以现在MySQL又属于Oracle公司。</p>
+
+<p>LNMP或者LAMP是流行的互联网架构，其中，第三个字母M就是指MySQL。</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/04/Eclipse-shortcut-key/">Eclipse快捷键操作</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-07-04T22:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>4</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>10:39 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><strong>大多数快捷键在苹果下对应Cmd键，在Windows下对应Ctrl键</strong></p>
+
+<p>Ctrl+l 快捷修复</p>
+
+<p>Ctrl+D 快捷删除行</p>
+
+<p>Shift+Enter 快速跳至下一行开头位置</p>
+
+<p>Ctrl+F11 快速运行项目</p>
+
+<p>Alt+上/下方向键 快速移动行</p>
+
+<p>Ctrl+Alt+上/下方向键 快速复制行</p>
+
+<p>Ctrl+M 将光标所在工作区域放大
+（*此种情况下，苹果系统也是用Ctrl）</p>
+
+<p>Alt+/ 快速调出代码补全</p>
+
+<p>Ctrl+/ 快速将代码注释</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  <div class="pagination">
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+    <a class="next" href="/posts/2">Newer &rarr;</a>
+    
+  </div>
+</div>
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/07/14/Service-is-bound-to-communicate-how-to-listen-to-the-internal-state-of-the-Service/">绑定Service进行通信（如何侦听Service的内部状态）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/07/13/Bind-Service-and-communicate-via-Binder/">绑定Service通信（Binder方式）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/07/13/Start-Service-and-transfer-data/">启动Service并传递数据</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/07/13/Service-Android/">认识Android Service</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/07/12/Application-life-cycle/">Application的生命周期</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Your Name -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

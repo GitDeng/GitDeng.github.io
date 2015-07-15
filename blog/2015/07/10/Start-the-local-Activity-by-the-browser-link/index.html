@@ -1,0 +1,301 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>通过浏览器链接启动本地Activity - My Octopress Blog</title>
+  <meta name="author" content="Your Name">
+
+  
+  <meta name="description" content="1 AndroidManifest.xml 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+&lt;activity android:name=".LocalAppAty" android:label="@string/title_activity_local_app_aty &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://gitdeng.github.io/blog/2015/07/10/Start-the-local-Activity-by-the-browser-link/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="My Octopress Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">My Octopress Blog</a></h1>
+  
+    <h2>A blogging framework for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="gitdeng.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">通过浏览器链接启动本地Activity</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-07-10T06:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>6:39 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2>1 AndroidManifest.xml</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;activity
+</span><span class='line'>    android:name=".LocalAppAty"
+</span><span class='line'>    android:label="@string/title_activity_local_app_aty" &gt;
+</span><span class='line'>    &lt;intent-filter&gt;
+</span><span class='line'>        &lt;!-- 设置浏览器可启动 --&gt;
+</span><span class='line'>        &lt;category android:name="android.intent.category.BROWSABLE"/&gt;
+</span><span class='line'>        &lt;!-- 设置默认启动Activity --&gt;
+</span><span class='line'>        &lt;category android:name="android.intent.category.DEFAULT"/&gt;
+</span><span class='line'>        &lt;!-- 浏览器链接被点击后，会发送一个View的action --&gt;
+</span><span class='line'>        &lt;action android:name="android.intent.action.VIEW"/&gt;
+</span><span class='line'>        &lt;!-- 设置协议为app --&gt;
+</span><span class='line'>        &lt;data android:scheme="app"/&gt;
+</span><span class='line'>    &lt;/intent-filter&gt;
+</span><span class='line'>&lt;/activity&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>2 LocalAppAty.java</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>@Override
+</span><span class='line'>protected void onCreate(Bundle savedInstanceState) {
+</span><span class='line'>    super.onCreate(savedInstanceState);
+</span><span class='line'>    setContentView(R.layout.activity_local_app_aty);
+</span><span class='line'>    //接收从浏览器传过来的参数，接收到的是一个Uri（android.net）对象
+</span><span class='line'>    Uri uri = getIntent().getData();
+</span><span class='line'>  //通过浏览器链接打开应用后，会在控制台输出html页面中链接的uri地址“I/System.out﹕app://hello”
+</span><span class='line'>    System.out.println(uri);
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>3 写一个带链接的静态页面（test.html）</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;!doctype html&gt;
+</span><span class='line'>    &lt;html lang="en"&gt;
+</span><span class='line'>    &lt;head&gt;
+</span><span class='line'>        &lt;meta charset="UTF-8"&gt;
+</span><span class='line'>        &lt;meta name="Generator" content="EditPlus®"&gt;
+</span><span class='line'>        &lt;meta name="Author" content=""&gt;
+</span><span class='line'>        &lt;meta name="Keywords" content=""&gt;
+</span><span class='line'>        &lt;meta name="Description" content=""&gt;
+</span><span class='line'>        &lt;style&gt;
+</span><span class='line'>        a{
+</span><span class='line'>            font-size:50pt;
+</span><span class='line'>        }
+</span><span class='line'>        &lt;/style&gt;
+</span><span class='line'>        &lt;title&gt;Document&lt;/title&gt;
+</span><span class='line'>    &lt;/head&gt;
+</span><span class='line'>    &lt;body&gt;
+</span><span class='line'>      &lt;a href="app://hello"&gt;Launch My App&lt;/a&gt;
+</span><span class='line'>    &lt;/body&gt;
+</span><span class='line'>&lt;/html&gt;</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Your Name</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-07-10T06:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>6:39 am</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/android/'>android</a>, <a class='category' href='/blog/categories/android-basic/'>android_basic</a>, <a class='category' href='/blog/categories/liu-lan-qi-qi-dong-ben-di-activity/'>浏览器启动本地activity</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/07/10/Intent-filter-options/" title="Previous Post: Intent过滤器相关选项">&laquo; Intent过滤器相关选项</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2015/07/12/Application-uses/" title="Next Post: Application的用途">Application的用途 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/07/14/Service-is-bound-to-communicate-how-to-listen-to-the-internal-state-of-the-Service/">绑定Service进行通信（如何侦听Service的内部状态）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/07/13/Bind-Service-and-communicate-via-Binder/">绑定Service通信（Binder方式）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/07/13/Start-Service-and-transfer-data/">启动Service并传递数据</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/07/13/Service-Android/">认识Android Service</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/07/12/Application-life-cycle/">Application的生命周期</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Your Name -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

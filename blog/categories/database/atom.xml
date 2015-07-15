@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Database | My Octopress Blog]]></title>
+  <link href="http://gitdeng.github.io/blog/categories/database/atom.xml" rel="self"/>
+  <link href="http://gitdeng.github.io/"/>
+  <updated>2015-07-15T15:32:00+08:00</updated>
+  <id>http://gitdeng.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[认识MySQL]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/05/MySQL-profile-profile/"/>
+    <updated>2015-07-05T22:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/05/MySQL-profile-profile</id>
+    <content type="html"><![CDATA[<h2>1 数据库的重要性</h2>
+
+<p>数据库技术是计算机科学技术中应用非常广泛的一个重要分支，现在，它已经成为IT世界里非常重要的技术基础，将来，数据库技术也应该不会消失，因为数据库是非常重要的东西，数据的容器当然也是非常重要的。</p>
+
+<h2>2 数据库的基本概念</h2>
+
+<p>数据库是一个有组织的、根据某种标准分类的数据集合。对于少量的信息，使用数据库保存的优势并不明显，但是当需要处理大量数据的时候，数据库的真正能力就体现出来了。比如说从成千上万条数据中检索符合指定条件的数据，对于数据库而言，是非常简单的事情。</p>
+
+<h2>3 MySQL数据库介绍</h2>
+
+<p>MySql是一个小型数据库管理系统，开发者为瑞典MySQL AB公司。这个公司在2008年被Sun公司收购，而2009年SUN公司又被Oracle收购。所以现在MySQL又属于Oracle公司。</p>
+
+<p>LNMP或者LAMP是流行的互联网架构，其中，第三个字母M就是指MySQL。</p>
+]]></content>
+  </entry>
+  
+</feed>

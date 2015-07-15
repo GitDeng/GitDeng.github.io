@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Intent过滤器 | My Octopress Blog]]></title>
+  <link href="http://gitdeng.github.io/blog/categories/intentguo-lu-qi/atom.xml" rel="self"/>
+  <link href="http://gitdeng.github.io/"/>
+  <updated>2015-07-15T15:32:00+08:00</updated>
+  <id>http://gitdeng.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Intent过滤器相关选项]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/10/Intent-filter-options/"/>
+    <updated>2015-07-10T04:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/10/Intent-filter-options</id>
+    <content type="html"><![CDATA[<p>*这里讨论当两个Activity的action相同的时候，如何启动相对应的Activity。</p>
+
+<h2>1 AndroidManifest.xml</h2>
+
+<p>其中，两个Activity的action的name都是"cn.loverobots.learnintent.intent.action.MyAty"。
+<code>
+    &lt;activity
+        android:name=".MyAty"
+        android:label="MyAty" &gt;
+        &lt;intent-filter&gt;
+            &lt;!-- 指定值为DEFAULT，则intent-filter的行为方式为Activity --&gt;
+            &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+            &lt;!-- 指定启动字符串，其中约定成俗的字符串格式为：包名.intent.action.类名 --&gt;
+            &lt;action android:name="cn.loverobots.learnintent.intent.action.MyAty"/&gt;
+        &lt;/intent-filter&gt;
+    &lt;/activity&gt;
+    &lt;activity
+        android:name=".MyAty2"
+        android:label="@string/title_activity_my_aty2" &gt;
+        &lt;intent-filter&gt;
+            &lt;category android:name="android.intent.category.DEFAULT"/&gt;
+            &lt;action android:name="cn.loverobots.learnintent.intent.action.MyAty"/&gt;
+            &lt;!-- 指定协议为app --&gt;
+            &lt;data android:scheme="app"/&gt;
+        &lt;/intent-filter&gt;
+    &lt;/activity&gt;
+</code></p>
+
+<h2>2 当前应用程序的MainActivity.java</h2>
+
+<p>则从当前应用程序的MainActivity启动另一个action时，会出现选择界面，需要手动选择启动哪一个Activity。
+```
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);</p>
+
+<pre><code>    findViewById(R.id.btnStartMyAty).setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            //这种启动方法默认可以跨应用程序启动里面的Activity
+            startActivity(new Intent(MyAty.ACTION));
+        }
+    });
+}
+</code></pre>
+
+<pre><code>##3 直接指定要启动的Activity
+要指定默认启动哪个Activity，需要利用Intent的构造函数中的重载函数，其第二个参数采用Uri.parse("app://hello")即可，其中“app”是在AndroidManifest.xml中为Activity指定的data android:scheme="app"。
+</code></pre>
+
+<pre><code>findViewById(R.id.btnStartMyAty).setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View v) {
+        try {//由于不确定此字符串是否可调用，所以需要捕获异常
+            startActivity(new Intent("cn.loverobots.learnintent.intent.action.MyAty", Uri.parse("app://hello")));
+        }catch(Exception e){
+            Toast.makeText(MainActivity.this,"无法启动指定的Activity",Toast.LENGTH_SHORT).show();
+        }
+    }
+});
+</code></pre>
+
+<p>```</p>
+]]></content>
+  </entry>
+  
+</feed>

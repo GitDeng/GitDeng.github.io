@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: 面试，面试硬技能 | My Octopress Blog]]></title>
+  <link href="http://gitdeng.github.io/blog/categories/mian-shi-,mian-shi-ying-ji-neng/atom.xml" rel="self"/>
+  <link href="http://gitdeng.github.io/"/>
+  <updated>2015-07-15T15:32:00+08:00</updated>
+  <id>http://gitdeng.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Android面试硬技能]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/09/Android-interview-hard-skills/"/>
+    <updated>2015-07-09T08:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/09/Android-interview-hard-skills</id>
+    <content type="html"><![CDATA[<h2>1 Java基础</h2>
+
+<p>1.1 面向对象<br/>
+1.2 Java集合框架<br/>
+1.3 异常处理<br/>
+1.4 Java反射<br/>
+1.5 泛型<br/>
+1.6 文件操作</p>
+
+<h2>2 Android基础</h2>
+
+<p>2.1 Activity<br/>
+2.2 Service<br/>
+2.3 BroadcastReceiver<br/>
+2.4 ContentProvider<br/>
+2.5 权限系统<br/>
+2.6 Intent与IntentFilter</p>
+
+<h2>3 UI控件与布局</h2>
+
+<p>3.1 常用的UI控件如Button、CheckBox等。<br/>
+3.2 常用的布局如LinearLayout、RelativeLayout、FrameLayout等。<br/>
+3.3 自定义控件<br/>
+3.4 View及SurfaceView绘图API<br/>
+3.5 视图动画效果<br/>
+3.6 布局动画效果<br/>
+3.7 自定义动画效果<br/>
+3.8 效率优化及常见问题解决</p>
+
+<h2>4 传感器</h2>
+
+<p>4.1 掌握getSystemService函数与SensorManager类的用法。<br/>
+4.2 学会使用加速度传感器<br/>
+4.3 学会使用指南针<br/>
+4.4 学会使用陀螺仪<br/>
+4.5 熟悉其它常用的传感器</p>
+
+<h2>5 定位系统</h2>
+
+<p>5.1 掌握getSystemService函数与LocationManager类的用法<br/>
+5.2 学会使用Android提供的定位系统API<br/>
+5.3 学会使用百度地图或者其它国内的地图服务商提供的API</p>
+
+<h2>6 常用数据格式</h2>
+
+<p>6.1 JSON格式数据的解析与生成：适合用程序去生成、解析、传输。<br/>
+6.2 XML格式数据的解析与生成：适合手动来编写。</p>
+
+<h2>7 网络编程相关</h2>
+
+<p>7.1 URLConnection<br/>
+7.2 HttpClient<br/>
+7.3 Socket<br/>
+7.4 *NIO：网络编程，主要特性是异步通信。（了解）</p>
+
+<h2>8 NDK与C/C++</h2>
+
+<p>8.1 NDK集成开发环境搭建<br/>
+8.2 Android.mk文件<br/>
+8.3 Application.mk文件<br/>
+8.4 javah工具的使用<br/>
+8.5 java与C++通信及需要注意的问题</p>
+
+<h2>9 游戏开发</h2>
+
+<p>9.1 Cocos2d-x框架开发Android游戏<br/>
+9.2 使用Unity开发Android游戏</p>
+]]></content>
+  </entry>
+  
+</feed>

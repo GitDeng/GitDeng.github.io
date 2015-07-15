@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Eclipse | My Octopress Blog]]></title>
+  <link href="http://gitdeng.github.io/blog/categories/eclipse/atom.xml" rel="self"/>
+  <link href="http://gitdeng.github.io/"/>
+  <updated>2015-07-15T15:32:00+08:00</updated>
+  <id>http://gitdeng.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Eclipse快捷键操作]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/04/Eclipse-shortcut-key/"/>
+    <updated>2015-07-04T22:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/04/Eclipse-shortcut-key</id>
+    <content type="html"><![CDATA[<p><strong>大多数快捷键在苹果下对应Cmd键，在Windows下对应Ctrl键</strong></p>
+
+<p>Ctrl+l 快捷修复</p>
+
+<p>Ctrl+D 快捷删除行</p>
+
+<p>Shift+Enter 快速跳至下一行开头位置</p>
+
+<p>Ctrl+F11 快速运行项目</p>
+
+<p>Alt+上/下方向键 快速移动行</p>
+
+<p>Ctrl+Alt+上/下方向键 快速复制行</p>
+
+<p>Ctrl+M 将光标所在工作区域放大
+（*此种情况下，苹果系统也是用Ctrl）</p>
+
+<p>Alt+/ 快速调出代码补全</p>
+
+<p>Ctrl+/ 快速将代码注释</p>
+]]></content>
+  </entry>
+  
+</feed>
