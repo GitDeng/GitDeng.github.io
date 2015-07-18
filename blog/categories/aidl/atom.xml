@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Aidl | 程序员笔记]]></title>
   <link href="http://gitdeng.github.io/blog/categories/aidl/atom.xml" rel="self"/>
   <link href="http://gitdeng.github.io/"/>
-  <updated>2015-07-18T17:02:12+08:00</updated>
+  <updated>2015-07-18T18:36:26+08:00</updated>
   <id>http://gitdeng.github.io/</id>
   <author>
     <name><![CDATA[程序员笔记]]></name>
@@ -14,9 +14,270 @@
 
   
   <entry>
-    <title type="html"><![CDATA[跨应用启动Service]]></title>
+    <title type="html"><![CDATA[跨应用绑定Servic并通信]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/18/Cross-application-binding-Service-and-communication/"/>
+    <updated>2015-07-18T04:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/18/Cross-application-binding-Service-and-communication</id>
+    <content type="html"><![CDATA[<p>跨应用绑定Service的目的就是为了数据通信，如果不进行数据通信，跨应用绑定Service也就没有意义了。</p>
+
+<h2>实现方法</h2>
+
+<h3>（app中）</h3>
+
+<h3>1 增加AIDL接口的抽象方法</h3>
+
+<pre><code>// IAppServiceRemoteBinder.aidl
+package cn.loverobots.startservicefromanotherapp;
+
+// Declare any non-default types here with import statements
+interface IAppServiceRemoteBinder {
+    /**
+     * Demonstrates some basic types that you can use as parameters
+     * and return values in AIDL.
+     */
+    void basicTypes(int anInt, long aLong, boolean aBoolean, float aFloat,
+            double aDouble, String aString);
+    //步骤1 增加接口抽象方法
+    void setData(String data);
+}
+</code></pre>
+
+<h3>2 AppService.java中实现接口抽象方法并增加测试线程</h3>
+
+<pre><code>package cn.loverobots.startservicefromanotherapp;
+
+import android.app.Service;
+import android.content.Intent;
+import android.os.IBinder;
+import android.os.RemoteException;
+
+public class AppService extends Service {
+
+    private String data = "默认文本";
+    private boolean running = false;
+
+    public AppService() {
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+
+        return new IAppServiceRemoteBinder.Stub() {
+            @Override
+            public void basicTypes(int anInt, long aLong, boolean aBoolean, float aFloat, double aDouble, String aString) throws RemoteException {
+
+            }
+            //步骤2 实现接口抽象方法
+            @Override
+            public void setData(String data) throws RemoteException {
+                AppService.this.data = data;
+            }
+
+        };
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        System.out.println("Service Started");
+        //步骤3 添加测试线程
+        new Thread(){
+            @Override
+            public void run() {
+                super.run();
+                running = true;
+                while (running){
+                    System.out.println(data);
+                    try {
+                        sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }.start();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        System.out.println("Service Destroyed");
+        //步骤4 摧毁线程同时不再输出文本
+        running = false;
+    }
+}
+</code></pre>
+
+<h3>（anotherapp中）</h3>
+
+<h3>3 增加同步测试数据按钮</h3>
+
+<pre><code>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    tools:context=".MainActivity"&gt;
+
+    &lt;TextView
+        android:text="跨应用启动服务测试"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="启动外部服务"
+        android:id="@+id/btnStartService" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="停止外部服务"
+        android:id="@+id/btnStopService" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="绑定外部服务"
+        android:id="@+id/btnBindAppService" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="解除绑定外部服务"
+        android:id="@+id/btnUnbindAppService" /&gt;
+    //步骤5 增加同步测试数据按钮
+    &lt;EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="这是另一个应用中的数据"
+        android:id="@+id/etInput" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="同步数据到绑定的服务中"
+        android:id="@+id/btnSync" /&gt;
+&lt;/LinearLayout&gt;
+</code></pre>
+
+<h3>4 从app中将aidl文件复制至anotherapp中（包名需保持一致）</h3>
+
+<pre><code>// IAppServiceRemoteBinder.aidl
+package cn.loverobots.startservicefromanotherapp;
+
+// Declare any non-default types here with import statements
+//步骤8 拷贝另一个应用中的aidl文件至当前应用中，需保证包名一致。然后Rebuild Project。
+interface IAppServiceRemoteBinder {
+    /**
+     * Demonstrates some basic types that you can use as parameters
+     * and return values in AIDL.
+     */
+    void basicTypes(int anInt, long aLong, boolean aBoolean, float aFloat,
+            double aDouble, String aString);
+
+    void setData(String data);
+}
+</code></pre>
+
+<h3>5 修改MainActivity.java</h3>
+
+<pre><code>package cn.loverobots.anotherapp;
+
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.support.v7.app.ActionBarActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.EditText;
+
+import cn.loverobots.startservicefromanotherapp.IAppServiceRemoteBinder;
+
+public class MainActivity extends ActionBarActivity implements View.OnClickListener, ServiceConnection {
+
+    private Intent ServiceIntent;
+    private EditText etInput;
+    private IAppServiceRemoteBinder binder = null;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        //步骤7 设置接收编辑文本框数据的对象
+        etInput = (EditText) findViewById(R.id.etInput);
+
+        ServiceIntent = new Intent();
+        //显式Intent方式启动Service
+        ServiceIntent.setComponent(new ComponentName("cn.loverobots.startservicefromanotherapp","cn.loverobots.startservicefromanotherapp.AppService"));
+
+        findViewById(R.id.btnStartService).setOnClickListener(this);
+        findViewById(R.id.btnStopService).setOnClickListener(this);
+
+        findViewById(R.id.btnBindAppService).setOnClickListener(this);
+        findViewById(R.id.btnUnbindAppService).setOnClickListener(this);
+        //步骤6 绑定同步数据按钮监听事件
+        findViewById(R.id.btnSync).setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.btnStartService:
+                startService(ServiceIntent);
+                break;
+            case R.id.btnStopService:
+                stopService(ServiceIntent);
+                break;
+
+            case R.id.btnBindAppService:
+                bindService(ServiceIntent,this, Context.BIND_AUTO_CREATE);
+                break;
+            case R.id.btnUnbindAppService:
+                unbindService(this);
+                binder = null;
+                break;
+            case R.id.btnSync:
+                //步骤9 将文本编辑框中数据通过binder方式传入
+                if(binder != null){
+                    try {
+                        binder.setData(etInput.getText().toString());
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                }
+                break;
+        }
+    }
+
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder service) {
+        System.out.println("Bind Service");
+        System.out.println(service);
+        //步骤10 绑定服务时，将获取的binder传入。
+        //不能使用binder = (IAppServiceRemoteBinder) service;直接进行强制类型转换，因为两者内存地址不一样
+        binder = IAppServiceRemoteBinder.Stub.asInterface(service);
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+        System.out.println("Unbind Service");
+    }
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[跨应用绑定Service]]></title>
     <link href="http://gitdeng.github.io/blog/2015/07/18/Cross-application-binding-Service/"/>
-    <updated>2015-07-18T02:39:20+08:00</updated>
+    <updated>2015-07-18T03:39:20+08:00</updated>
     <id>http://gitdeng.github.io/blog/2015/07/18/Cross-application-binding-Service</id>
     <content type="html"><![CDATA[<h2>1 建立AIDL服务的步骤</h2>
 

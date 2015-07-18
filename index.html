@@ -9,9 +9,21 @@
   <meta name="author" content="程序员笔记">
 
   
-  <meta name="description" content="1 建立AIDL服务的步骤 建立AIDL服务要比建立普通的服务复杂一些，具体步骤如下：
-2.1 在Eclipse Android工程的Java包目录中建立一个扩展名为aidl的文件。该文件的语法类似于Java代码，但会稍有不同。
-2.2 如果aidl文件的内容是正确的， &hellip;">
+  <meta name="description" content="跨应用绑定Service的目的就是为了数据通信，如果不进行数据通信，跨应用绑定Service也就没有意义了。 实现方法 （app中） 1 增加AIDL接口的抽象方法 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+// IAppServiceRemoteBinder.aidl &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -74,7 +86,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2015/07/18/Cross-application-binding-Service/">跨应用启动Service</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/07/18/Cross-application-binding-Service-and-communication/">跨应用绑定Servic并通信</a></h1>
     
     
       <p class="meta">
@@ -83,7 +95,517 @@
 
 
 
-<time class='entry-date' datetime='2015-07-18T02:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>18</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>2:39 am</span></time>
+<time class='entry-date' datetime='2015-07-18T04:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>18</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>4:39 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>跨应用绑定Service的目的就是为了数据通信，如果不进行数据通信，跨应用绑定Service也就没有意义了。</p>
+
+<h2>实现方法</h2>
+
+<h3>（app中）</h3>
+
+<h3>1 增加AIDL接口的抽象方法</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>// IAppServiceRemoteBinder.aidl
+</span><span class='line'>package cn.loverobots.startservicefromanotherapp;
+</span><span class='line'>
+</span><span class='line'>// Declare any non-default types here with import statements
+</span><span class='line'>interface IAppServiceRemoteBinder {
+</span><span class='line'>    /**
+</span><span class='line'>     * Demonstrates some basic types that you can use as parameters
+</span><span class='line'>     * and return values in AIDL.
+</span><span class='line'>     */
+</span><span class='line'>    void basicTypes(int anInt, long aLong, boolean aBoolean, float aFloat,
+</span><span class='line'>            double aDouble, String aString);
+</span><span class='line'>    //步骤1 增加接口抽象方法
+</span><span class='line'>    void setData(String data);
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2 AppService.java中实现接口抽象方法并增加测试线程</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.startservicefromanotherapp;
+</span><span class='line'>
+</span><span class='line'>import android.app.Service;
+</span><span class='line'>import android.content.Intent;
+</span><span class='line'>import android.os.IBinder;
+</span><span class='line'>import android.os.RemoteException;
+</span><span class='line'>
+</span><span class='line'>public class AppService extends Service {
+</span><span class='line'>
+</span><span class='line'>    private String data = "默认文本";
+</span><span class='line'>    private boolean running = false;
+</span><span class='line'>
+</span><span class='line'>    public AppService() {
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    @Override
+</span><span class='line'>    public IBinder onBind(Intent intent) {
+</span><span class='line'>
+</span><span class='line'>        return new IAppServiceRemoteBinder.Stub() {
+</span><span class='line'>            @Override
+</span><span class='line'>            public void basicTypes(int anInt, long aLong, boolean aBoolean, float aFloat, double aDouble, String aString) throws RemoteException {
+</span><span class='line'>
+</span><span class='line'>            }
+</span><span class='line'>            //步骤2 实现接口抽象方法
+</span><span class='line'>            @Override
+</span><span class='line'>            public void setData(String data) throws RemoteException {
+</span><span class='line'>                AppService.this.data = data;
+</span><span class='line'>            }
+</span><span class='line'>
+</span><span class='line'>        };
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    @Override
+</span><span class='line'>    public void onCreate() {
+</span><span class='line'>        super.onCreate();
+</span><span class='line'>        System.out.println("Service Started");
+</span><span class='line'>        //步骤3 添加测试线程
+</span><span class='line'>        new Thread(){
+</span><span class='line'>            @Override
+</span><span class='line'>            public void run() {
+</span><span class='line'>                super.run();
+</span><span class='line'>                running = true;
+</span><span class='line'>                while (running){
+</span><span class='line'>                    System.out.println(data);
+</span><span class='line'>                    try {
+</span><span class='line'>                        sleep(1000);
+</span><span class='line'>                    } catch (InterruptedException e) {
+</span><span class='line'>                        e.printStackTrace();
+</span><span class='line'>                    }
+</span><span class='line'>                }
+</span><span class='line'>            }
+</span><span class='line'>        }.start();
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    @Override
+</span><span class='line'>    public void onDestroy() {
+</span><span class='line'>        super.onDestroy();
+</span><span class='line'>        System.out.println("Service Destroyed");
+</span><span class='line'>        //步骤4 摧毁线程同时不再输出文本
+</span><span class='line'>        running = false;
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>（anotherapp中）</h3>
+
+<h3>3 增加同步测试数据按钮</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+</span><span class='line'>    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+</span><span class='line'>    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+</span><span class='line'>    android:paddingRight="@dimen/activity_horizontal_margin"
+</span><span class='line'>    android:paddingTop="@dimen/activity_vertical_margin"
+</span><span class='line'>    android:paddingBottom="@dimen/activity_vertical_margin"
+</span><span class='line'>    android:orientation="vertical"
+</span><span class='line'>    tools:context=".MainActivity"&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;TextView
+</span><span class='line'>        android:text="跨应用启动服务测试"
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content" /&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;Button
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:text="启动外部服务"
+</span><span class='line'>        android:id="@+id/btnStartService" /&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;Button
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:text="停止外部服务"
+</span><span class='line'>        android:id="@+id/btnStopService" /&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;Button
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:text="绑定外部服务"
+</span><span class='line'>        android:id="@+id/btnBindAppService" /&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;Button
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:text="解除绑定外部服务"
+</span><span class='line'>        android:id="@+id/btnUnbindAppService" /&gt;
+</span><span class='line'>    //步骤5 增加同步测试数据按钮
+</span><span class='line'>    &lt;EditText
+</span><span class='line'>        android:layout_width="match_parent"
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:text="这是另一个应用中的数据"
+</span><span class='line'>        android:id="@+id/etInput" /&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;Button
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:text="同步数据到绑定的服务中"
+</span><span class='line'>        android:id="@+id/btnSync" /&gt;
+</span><span class='line'>&lt;/LinearLayout&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>4 从app中将aidl文件复制至anotherapp中（包名需保持一致）</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>// IAppServiceRemoteBinder.aidl
+</span><span class='line'>package cn.loverobots.startservicefromanotherapp;
+</span><span class='line'>
+</span><span class='line'>// Declare any non-default types here with import statements
+</span><span class='line'>//步骤8 拷贝另一个应用中的aidl文件至当前应用中，需保证包名一致。然后Rebuild Project。
+</span><span class='line'>interface IAppServiceRemoteBinder {
+</span><span class='line'>    /**
+</span><span class='line'>     * Demonstrates some basic types that you can use as parameters
+</span><span class='line'>     * and return values in AIDL.
+</span><span class='line'>     */
+</span><span class='line'>    void basicTypes(int anInt, long aLong, boolean aBoolean, float aFloat,
+</span><span class='line'>            double aDouble, String aString);
+</span><span class='line'>
+</span><span class='line'>    void setData(String data);
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<h3>5 修改MainActivity.java</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.anotherapp;
+</span><span class='line'>
+</span><span class='line'>import android.content.ComponentName;
+</span><span class='line'>import android.content.Context;
+</span><span class='line'>import android.content.Intent;
+</span><span class='line'>import android.content.ServiceConnection;
+</span><span class='line'>import android.os.IBinder;
+</span><span class='line'>import android.os.RemoteException;
+</span><span class='line'>import android.support.v7.app.ActionBarActivity;
+</span><span class='line'>import android.os.Bundle;
+</span><span class='line'>import android.view.View;
+</span><span class='line'>import android.widget.EditText;
+</span><span class='line'>
+</span><span class='line'>import cn.loverobots.startservicefromanotherapp.IAppServiceRemoteBinder;
+</span><span class='line'>
+</span><span class='line'>public class MainActivity extends ActionBarActivity implements View.OnClickListener, ServiceConnection {
+</span><span class='line'>
+</span><span class='line'>    private Intent ServiceIntent;
+</span><span class='line'>    private EditText etInput;
+</span><span class='line'>    private IAppServiceRemoteBinder binder = null;
+</span><span class='line'>
+</span><span class='line'>    @Override
+</span><span class='line'>    protected void onCreate(Bundle savedInstanceState) {
+</span><span class='line'>        super.onCreate(savedInstanceState);
+</span><span class='line'>        setContentView(R.layout.activity_main);
+</span><span class='line'>        //步骤7 设置接收编辑文本框数据的对象
+</span><span class='line'>        etInput = (EditText) findViewById(R.id.etInput);
+</span><span class='line'>
+</span><span class='line'>        ServiceIntent = new Intent();
+</span><span class='line'>        //显式Intent方式启动Service
+</span><span class='line'>        ServiceIntent.setComponent(new ComponentName("cn.loverobots.startservicefromanotherapp","cn.loverobots.startservicefromanotherapp.AppService"));
+</span><span class='line'>
+</span><span class='line'>        findViewById(R.id.btnStartService).setOnClickListener(this);
+</span><span class='line'>        findViewById(R.id.btnStopService).setOnClickListener(this);
+</span><span class='line'>
+</span><span class='line'>        findViewById(R.id.btnBindAppService).setOnClickListener(this);
+</span><span class='line'>        findViewById(R.id.btnUnbindAppService).setOnClickListener(this);
+</span><span class='line'>        //步骤6 绑定同步数据按钮监听事件
+</span><span class='line'>        findViewById(R.id.btnSync).setOnClickListener(this);
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    @Override
+</span><span class='line'>    public void onClick(View v) {
+</span><span class='line'>        switch (v.getId()){
+</span><span class='line'>            case R.id.btnStartService:
+</span><span class='line'>                startService(ServiceIntent);
+</span><span class='line'>                break;
+</span><span class='line'>            case R.id.btnStopService:
+</span><span class='line'>                stopService(ServiceIntent);
+</span><span class='line'>                break;
+</span><span class='line'>
+</span><span class='line'>            case R.id.btnBindAppService:
+</span><span class='line'>                bindService(ServiceIntent,this, Context.BIND_AUTO_CREATE);
+</span><span class='line'>                break;
+</span><span class='line'>            case R.id.btnUnbindAppService:
+</span><span class='line'>                unbindService(this);
+</span><span class='line'>                binder = null;
+</span><span class='line'>                break;
+</span><span class='line'>            case R.id.btnSync:
+</span><span class='line'>                //步骤9 将文本编辑框中数据通过binder方式传入
+</span><span class='line'>                if(binder != null){
+</span><span class='line'>                    try {
+</span><span class='line'>                        binder.setData(etInput.getText().toString());
+</span><span class='line'>                    } catch (RemoteException e) {
+</span><span class='line'>                        e.printStackTrace();
+</span><span class='line'>                    }
+</span><span class='line'>                }
+</span><span class='line'>                break;
+</span><span class='line'>        }
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    @Override
+</span><span class='line'>    public void onServiceConnected(ComponentName name, IBinder service) {
+</span><span class='line'>        System.out.println("Bind Service");
+</span><span class='line'>        System.out.println(service);
+</span><span class='line'>        //步骤10 绑定服务时，将获取的binder传入。
+</span><span class='line'>        //不能使用binder = (IAppServiceRemoteBinder) service;直接进行强制类型转换，因为两者内存地址不一样
+</span><span class='line'>        binder = IAppServiceRemoteBinder.Stub.asInterface(service);
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    @Override
+</span><span class='line'>    public void onServiceDisconnected(ComponentName name) {
+</span><span class='line'>        System.out.println("Unbind Service");
+</span><span class='line'>    }
+</span><span class='line'>}
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/18/Cross-application-binding-Service/">跨应用绑定Service</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-07-18T03:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>18</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>3:39 am</span></time>
         
       </p>
     
@@ -3061,141 +3583,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/07/10/Intent-filter-options/">Intent过滤器相关选项</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2015-07-10T04:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>4:39 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>*这里讨论当两个Activity的action相同的时候，如何启动相对应的Activity。</p>
-
-<h2>1 AndroidManifest.xml</h2>
-
-<p>其中，两个Activity的action的name都是"cn.loverobots.learnintent.intent.action.MyAty"。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;activity
-</span><span class='line'>    android:name=".MyAty"
-</span><span class='line'>    android:label="MyAty" &gt;
-</span><span class='line'>    &lt;intent-filter&gt;
-</span><span class='line'>        &lt;!-- 指定值为DEFAULT，则intent-filter的行为方式为Activity --&gt;
-</span><span class='line'>        &lt;category android:name="android.intent.category.DEFAULT" /&gt;
-</span><span class='line'>        &lt;!-- 指定启动字符串，其中约定成俗的字符串格式为：包名.intent.action.类名 --&gt;
-</span><span class='line'>        &lt;action android:name="cn.loverobots.learnintent.intent.action.MyAty"/&gt;
-</span><span class='line'>    &lt;/intent-filter&gt;
-</span><span class='line'>&lt;/activity&gt;
-</span><span class='line'>&lt;activity
-</span><span class='line'>    android:name=".MyAty2"
-</span><span class='line'>    android:label="@string/title_activity_my_aty2" &gt;
-</span><span class='line'>    &lt;intent-filter&gt;
-</span><span class='line'>        &lt;category android:name="android.intent.category.DEFAULT"/&gt;
-</span><span class='line'>        &lt;action android:name="cn.loverobots.learnintent.intent.action.MyAty"/&gt;
-</span><span class='line'>      &lt;!-- 指定协议为app --&gt;
-</span><span class='line'>        &lt;data android:scheme="app"/&gt;
-</span><span class='line'>    &lt;/intent-filter&gt;
-</span><span class='line'>&lt;/activity&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>2 当前应用程序的MainActivity.java</h2>
-
-<p>则从当前应用程序的MainActivity启动另一个action时，会出现选择界面，需要手动选择启动哪一个Activity。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>@Override
-</span><span class='line'>protected void onCreate(Bundle savedInstanceState) {
-</span><span class='line'>    super.onCreate(savedInstanceState);
-</span><span class='line'>    setContentView(R.layout.activity_main);
-</span><span class='line'>
-</span><span class='line'>    findViewById(R.id.btnStartMyAty).setOnClickListener(new View.OnClickListener() {
-</span><span class='line'>        @Override
-</span><span class='line'>        public void onClick(View v) {
-</span><span class='line'>            //这种启动方法默认可以跨应用程序启动里面的Activity
-</span><span class='line'>            startActivity(new Intent(MyAty.ACTION));
-</span><span class='line'>        }
-</span><span class='line'>    });
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>3 直接指定要启动的Activity</h2>
-
-<p>要指定默认启动哪个Activity，需要利用Intent的构造函数中的重载函数，其第二个参数采用Uri.parse(&ldquo;app://hello&rdquo;)即可，其中“app”是在AndroidManifest.xml中为Activity指定的data android:scheme=&ldquo;app"。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>findViewById(R.id.btnStartMyAty).setOnClickListener(new View.OnClickListener() {
-</span><span class='line'>    @Override
-</span><span class='line'>    public void onClick(View v) {
-</span><span class='line'>        try {//由于不确定此字符串是否可调用，所以需要捕获异常
-</span><span class='line'>            startActivity(new Intent("cn.loverobots.learnintent.intent.action.MyAty", Uri.parse("app://hello")));
-</span><span class='line'>        }catch(Exception e){
-</span><span class='line'>            Toast.makeText(MainActivity.this,"无法启动指定的Activity",Toast.LENGTH_SHORT).show();
-</span><span class='line'>        }
-</span><span class='line'>    }
-</span><span class='line'>});</span></code></pre></td></tr></table></div></figure>
-
-
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; 前一页</a>
@@ -3211,7 +3598,11 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/07/18/Cross-application-binding-Service/">跨应用启动Service</a>
+        <a href="/blog/2015/07/18/Cross-application-binding-Service-and-communication/">跨应用绑定Servic并通信</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/07/18/Cross-application-binding-Service/">跨应用绑定Service</a>
       </li>
     
       <li class="post">
@@ -3224,10 +3615,6 @@
     
       <li class="post">
         <a href="/blog/2015/07/13/Bind-Service-and-communicate-via-Binder/">绑定Service通信（Binder方式）</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/07/13/Start-Service-and-transfer-data/">启动Service并传递数据</a>
       </li>
     
   </ul>

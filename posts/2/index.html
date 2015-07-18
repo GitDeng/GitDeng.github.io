@@ -9,13 +9,8 @@
   <meta name="author" content="程序员笔记">
 
   
-  <meta name="description" content="显示Intent 即采用指定类的方式。 1
-2
-3
-4
-5
-6
-findViewById(R.id.btnStartMyAty).setOnClickListener(new View.OnClickListener() { @Override public void onClick(View v &hellip;">
+  <meta name="description" content="*这里讨论当两个Activity的action相同的时候，如何启动相对应的Activity。 1 AndroidManifest.xml 其中，两个Activity的action的name都是"cn.loverobots.learnintent.intent.action.MyAty"。 1
+2 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -72,6 +67,141 @@ findViewById(R.id.btnStartMyAty).setOnClickListener(new View.OnClickListener() {
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/10/Intent-filter-options/">Intent过滤器相关选项</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-07-10T04:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>4:39 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>*这里讨论当两个Activity的action相同的时候，如何启动相对应的Activity。</p>
+
+<h2>1 AndroidManifest.xml</h2>
+
+<p>其中，两个Activity的action的name都是"cn.loverobots.learnintent.intent.action.MyAty"。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;activity
+</span><span class='line'>    android:name=".MyAty"
+</span><span class='line'>    android:label="MyAty" &gt;
+</span><span class='line'>    &lt;intent-filter&gt;
+</span><span class='line'>        &lt;!-- 指定值为DEFAULT，则intent-filter的行为方式为Activity --&gt;
+</span><span class='line'>        &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+</span><span class='line'>        &lt;!-- 指定启动字符串，其中约定成俗的字符串格式为：包名.intent.action.类名 --&gt;
+</span><span class='line'>        &lt;action android:name="cn.loverobots.learnintent.intent.action.MyAty"/&gt;
+</span><span class='line'>    &lt;/intent-filter&gt;
+</span><span class='line'>&lt;/activity&gt;
+</span><span class='line'>&lt;activity
+</span><span class='line'>    android:name=".MyAty2"
+</span><span class='line'>    android:label="@string/title_activity_my_aty2" &gt;
+</span><span class='line'>    &lt;intent-filter&gt;
+</span><span class='line'>        &lt;category android:name="android.intent.category.DEFAULT"/&gt;
+</span><span class='line'>        &lt;action android:name="cn.loverobots.learnintent.intent.action.MyAty"/&gt;
+</span><span class='line'>      &lt;!-- 指定协议为app --&gt;
+</span><span class='line'>        &lt;data android:scheme="app"/&gt;
+</span><span class='line'>    &lt;/intent-filter&gt;
+</span><span class='line'>&lt;/activity&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>2 当前应用程序的MainActivity.java</h2>
+
+<p>则从当前应用程序的MainActivity启动另一个action时，会出现选择界面，需要手动选择启动哪一个Activity。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>@Override
+</span><span class='line'>protected void onCreate(Bundle savedInstanceState) {
+</span><span class='line'>    super.onCreate(savedInstanceState);
+</span><span class='line'>    setContentView(R.layout.activity_main);
+</span><span class='line'>
+</span><span class='line'>    findViewById(R.id.btnStartMyAty).setOnClickListener(new View.OnClickListener() {
+</span><span class='line'>        @Override
+</span><span class='line'>        public void onClick(View v) {
+</span><span class='line'>            //这种启动方法默认可以跨应用程序启动里面的Activity
+</span><span class='line'>            startActivity(new Intent(MyAty.ACTION));
+</span><span class='line'>        }
+</span><span class='line'>    });
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>3 直接指定要启动的Activity</h2>
+
+<p>要指定默认启动哪个Activity，需要利用Intent的构造函数中的重载函数，其第二个参数采用Uri.parse(&ldquo;app://hello&rdquo;)即可，其中“app”是在AndroidManifest.xml中为Activity指定的data android:scheme=&ldquo;app"。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>findViewById(R.id.btnStartMyAty).setOnClickListener(new View.OnClickListener() {
+</span><span class='line'>    @Override
+</span><span class='line'>    public void onClick(View v) {
+</span><span class='line'>        try {//由于不确定此字符串是否可调用，所以需要捕获异常
+</span><span class='line'>            startActivity(new Intent("cn.loverobots.learnintent.intent.action.MyAty", Uri.parse("app://hello")));
+</span><span class='line'>        }catch(Exception e){
+</span><span class='line'>            Toast.makeText(MainActivity.this,"无法启动指定的Activity",Toast.LENGTH_SHORT).show();
+</span><span class='line'>        }
+</span><span class='line'>    }
+</span><span class='line'>});</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1599,37 +1729,6 @@ findViewById(R.id.btnStartMyAty).setOnClickListener(new View.OnClickListener() {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/07/08/Activity-life-cycle/">Android中Activity的生命周期</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2015-07-08T06:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>8</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>6:39 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>官方文档说明图</h2>
-
-<p><img src="http://www.loverobots.cn/wp-content/uploads/2015/07/activity_lifecycle-00.jpg" alt="Activity的生命周期" /></p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; 前一页</a>
@@ -1647,7 +1746,11 @@ findViewById(R.id.btnStartMyAty).setOnClickListener(new View.OnClickListener() {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/07/18/Cross-application-binding-Service/">跨应用启动Service</a>
+        <a href="/blog/2015/07/18/Cross-application-binding-Service-and-communication/">跨应用绑定Servic并通信</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/07/18/Cross-application-binding-Service/">跨应用绑定Service</a>
       </li>
     
       <li class="post">
@@ -1660,10 +1763,6 @@ findViewById(R.id.btnStartMyAty).setOnClickListener(new View.OnClickListener() {
     
       <li class="post">
         <a href="/blog/2015/07/13/Bind-Service-and-communicate-via-Binder/">绑定Service通信（Binder方式）</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/07/13/Start-Service-and-transfer-data/">启动Service并传递数据</a>
       </li>
     
   </ul>
