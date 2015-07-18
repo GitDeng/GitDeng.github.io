@@ -9,8 +9,7 @@
   <meta name="author" content="程序员笔记">
 
   
-  <meta name="description" content="1 使用Service 使用场景 不需要有可以与用户交互的界面，只需要在后台一直运行，做一些事务的处理，比如说Socket超链接、Http的网络通信以及与服务器保持推送的一个链接。
-注意：Service实例在一个应用程序中只能有一个。 2 绑定Service 启动服务也可以通过绑定服务的方式启动 &hellip;">
+  <meta name="description" content="1 使用Service 1.1 认识Service Service与Activity的地位是并列的，它代表一个单独的Android组件。Service与Activity的区别在于：Service通常位于后台运行，它一般不需要与用户交互，因此Service组件没有图形用户界面。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -88,7 +87,12 @@
 
 <div class="entry-content"><h2>1 使用Service</h2>
 
-<h3>使用场景</h3>
+<h3>1.1 认识Service</h3>
+
+<p>Service与Activity的地位是并列的，它代表一个单独的Android组件。Service与Activity的区别在于：Service通常位于后台运行，它一般不需要与用户交互，因此Service组件没有图形用户界面。
+与Activity组件需要继承Activity基类类似，Service组件需要继承Service基类。一个Service组件被运行起来之后，它将拥有自己独立的生命周期，Service组件通常用于为其他组件提供后台服务或监控其他组件的运行状态。</p>
+
+<h3>1.2 使用场景</h3>
 
 <p>不需要有可以与用户交互的界面，只需要在后台一直运行，做一些事务的处理，比如说Socket超链接、Http的网络通信以及与服务器保持推送的一个链接。<br/>
 <strong>注意</strong>：Service实例在一个应用程序中只能有一个。</p>
@@ -559,6 +563,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/07/18/Cross-application-startup-Service/">跨应用启动Service</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/07/14/Service-is-bound-to-communicate-how-to-listen-to-the-internal-state-of-the-Service/">绑定Service进行通信（如何侦听Service的内部状态）</a>
       </li>
     
@@ -572,10 +580,6 @@
     
       <li class="post">
         <a href="/blog/2015/07/13/Service-Android/">认识Android Service</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/07/12/Application-life-cycle/">Application的生命周期</a>
       </li>
     
   </ul>

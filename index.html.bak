@@ -9,7 +9,7 @@
   <meta name="author" content="程序员笔记">
 
   
-  <meta name="description" content=" Blog Archives Recent Posts 绑定Service进行通信（如何侦听Service的内部状态） 绑定Service通信（Binder方式） 启动Service并传递数据 认识Android Service Application的生命周期 ">
+  <meta name="description" content=" Blog Archives Recent Posts 跨应用启动Service 绑定Service进行通信（如何侦听Service的内部状态） 绑定Service通信（Binder方式） 启动Service并传递数据 认识Android Service ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +80,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/07/18/Cross-application-startup-Service/">跨应用启动Service</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/07/14/Service-is-bound-to-communicate-how-to-listen-to-the-internal-state-of-the-Service/">绑定Service进行通信（如何侦听Service的内部状态）</a>
       </li>
     
@@ -93,10 +97,6 @@
     
       <li class="post">
         <a href="/blog/2015/07/13/Service-Android/">认识Android Service</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/07/12/Application-life-cycle/">Application的生命周期</a>
       </li>
     
   </ul>
