@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android | 程序员笔记]]></title>
   <link href="http://gitdeng.github.io/blog/categories/android/atom.xml" rel="self"/>
   <link href="http://gitdeng.github.io/"/>
-  <updated>2015-07-18T18:36:26+08:00</updated>
+  <updated>2015-07-19T01:15:02+08:00</updated>
   <id>http://gitdeng.github.io/</id>
   <author>
     <name><![CDATA[程序员笔记]]></name>
@@ -12,6 +12,161 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[动态注册和注销BroadcastReceiver]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/19/Dynamic%20registration%20and%20cancellation%20BroadcastReceiver/"/>
+    <updated>2015-07-19T01:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/19/Dynamic registration and cancellation BroadcastReceiver</id>
+    <content type="html"><![CDATA[<h2>BroadcastReceiver简介</h2>
+
+<p>BroadcastReceiver 是Android 四大基本组件之一，用于接收广播信息，如：开屏、锁屏、短信等等，在实际工作中用途非常广泛。</p>
+
+<h2>动态注册和注销BroadcastReceiver</h2>
+
+<p>有的情况下，我们不希望BroadcastReceiver始终处于侦听状态，这时就需要会注册和注销BroadcastReceiver。</p>
+
+<h3>1 MainActivity.java</h3>
+
+<pre><code>package cn.loverobots.learnbroadcastreceiver;
+
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.support.v7.app.ActionBarActivity;
+import android.os.Bundle;
+import android.view.View;
+
+public class MainActivity extends ActionBarActivity implements View.OnClickListener {
+
+    private MyReceiver receiver = null;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        findViewById(R.id.btnSendMsg).setOnClickListener(this);
+        findViewById(R.id.btnReg).setOnClickListener(this);
+        findViewById(R.id.btnUnreg).setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch(v.getId()){
+            case R.id.btnSendMsg:
+//                Intent i = new Intent(this,MyReceiver.class);
+                //这时只能隐式Intent传递数据了
+                Intent i = new Intent(MyReceiver.ACTION);
+                i.putExtra("data","JACK的机器人");
+                sendBroadcast(i);
+                break;
+            case R.id.btnReg:
+                //为避免重复注册操作，加入判断条件
+                if(receiver == null){
+                    //初始化receiver
+                    receiver = new MyReceiver();
+                    registerReceiver(receiver,new IntentFilter(MyReceiver.ACTION));
+                    System.out.println("注册了接收器");
+                }
+                break;
+            case R.id.btnUnreg:
+                if(receiver != null){
+                    unregisterReceiver(receiver);
+                    receiver = null;
+                    System.out.println("注消了接收器");
+                }
+                break;
+        }
+    }
+}
+</code></pre>
+
+<h3>2 MyReceiver.java</h3>
+
+<pre><code>package cn.loverobots.learnbroadcastreceiver;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+
+public class MyReceiver extends BroadcastReceiver {
+
+    public static final String ACTION = "cn.loverobots.learnbroadcastreceiver.intent.action.MyReceiver";
+
+    public MyReceiver() {
+    }
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        System.out.println("接收到了消息，消息的内容是："+intent.getStringExtra("data"));
+    }
+}
+</code></pre>
+
+<h3>3 activity_main.xml</h3>
+
+<pre><code>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    tools:context=".MainActivity"&gt;
+
+    &lt;TextView
+        android:text="@string/hello_world"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="发送消息"
+        android:id="@+id/btnSendMsg" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="注册接收器"
+        android:id="@+id/btnReg" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="注销接收器"
+        android:id="@+id/btnUnreg" /&gt;
+
+&lt;/LinearLayout&gt;
+</code></pre>
+
+<h3>4 AndroidMainfest.xml</h3>
+
+<pre><code>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="cn.loverobots.learnbroadcastreceiver" &gt;
+
+    &lt;application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" &gt;
+        &lt;activity
+            android:name=".MainActivity"
+            android:label="@string/app_name" &gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name="android.intent.action.MAIN" /&gt;
+
+                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/activity&gt;
+
+    &lt;/application&gt;
+
+&lt;/manifest&gt;
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[跨应用绑定Servic并通信]]></title>
@@ -918,202 +1073,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             android:text="同步数据"
             android:id="@+id/btnSyncData" /&gt;
     &lt;/LinearLayout&gt;
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[绑定Service通信（Binder方式）]]></title>
-    <link href="http://gitdeng.github.io/blog/2015/07/13/Bind-Service-and-communicate-via-Binder/"/>
-    <updated>2015-07-13T04:39:20+08:00</updated>
-    <id>http://gitdeng.github.io/blog/2015/07/13/Bind-Service-and-communicate-via-Binder</id>
-    <content type="html"><![CDATA[<p>绑定Service时，通过Binder方式进行数据传递，比通过启动Service的方式更方便也更高效。</p>
-
-<h2>示例代码</h2>
-
-<h3>1 MainActivity（继承Activity，实现View.OnClickListener, ServiceConnection接口）</h3>
-
-<pre><code>package cn.loverobots.connectservice;
-
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.IBinder;
-import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.EditText;
-
-public class MainActivity extends ActionBarActivity implements View.OnClickListener, ServiceConnection {
-
-    private EditText editText;
-    private Intent intent;
-    private MyService.Binder binder = null;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        editText = (EditText) findViewById(R.id.editText);
-        findViewById(R.id.btnStartService).setOnClickListener(this);
-        findViewById(R.id.btnStopService).setOnClickListener(this);
-        findViewById(R.id.btnBindService).setOnClickListener(this);
-        findViewById(R.id.btnUnbindService).setOnClickListener(this);
-        findViewById(R.id.btnSyncData).setOnClickListener(this);
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()){
-            case R.id.btnStartService:
-                System.out.println("启动服务");
-                intent = new Intent(this,MyService.class);
-                //传递名为“etData”的字符串类型的数据
-                intent.putExtra("etData", editText.getText().toString());
-                startService(intent);
-                break;
-            case R.id.btnStopService:
-                System.out.println("停止服务");
-                stopService(new Intent(this,MyService.class));
-                break;
-            case R.id.btnBindService:
-                bindService(new Intent(this,MyService.class),this, Context.BIND_AUTO_CREATE);
-                break;
-            case R.id.btnUnbindService:
-                unbindService(this);
-                break;
-            case R.id.btnSyncData:
-                if(binder!=null){
-                    binder.setData(editText.getText().toString());
-                }
-                break;
-        }
-    }
-
-    @Override
-    public void onServiceConnected(ComponentName name, IBinder service) {
-        //接收来自MyService的Binder中的数据
-        binder = (MyService.Binder) service;
-    }
-
-    @Override
-    public void onServiceDisconnected(ComponentName name) {
-
-    }
-}
-</code></pre>
-
-<h3>2 MyService（继承Service）</h3>
-
-<pre><code>package cn.loverobots.connectservice;
-
-import android.app.Service;
-import android.content.Intent;
-import android.os.Binder;
-import android.os.IBinder;
-
-public class MyService extends Service {
-    private static boolean ServiceRunning = false;
-    private String etData = "默认文本";
-
-    public MyService() {
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return new Binder();
-    }
-    //创建一个Binder对象继承系统中的Binder类，并创建一个传递数据的方法setData
-    public class Binder extends android.os.Binder{
-        public void setData(String etData){
-            MyService.this.etData = etData;
-        }
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        etData = intent.getStringExtra("etData");
-        return super.onStartCommand(intent, flags, startId);
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        System.out.println("服务创建");
-        ServiceRunning = true;
-        new Thread(){
-            @Override
-            public void run() {
-                super.run();
-                while (ServiceRunning){
-                    System.out.println(etData);
-                    try {
-                        sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }.start();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        System.out.println("服务停止");
-        ServiceRunning = false;
-    }
-}
-</code></pre>
-
-<h3>3 activity_main.xml</h3>
-
-<pre><code>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:orientation="vertical"
-    tools:context=".MainActivity"&gt;
-
-    &lt;EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="默认文本"
-        android:id="@+id/editText" /&gt;
-
-    &lt;Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="启动服务"
-        android:id="@+id/btnStartService" /&gt;
-
-    &lt;Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="停止服务"
-        android:id="@+id/btnStopService" /&gt;
-
-    &lt;Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="绑定服务"
-        android:id="@+id/btnBindService" /&gt;
-
-    &lt;Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="解除绑定服务"
-        android:id="@+id/btnUnbindService" /&gt;
-
-    &lt;Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="同步数据"
-        android:id="@+id/btnSyncData" /&gt;
-&lt;/LinearLayout&gt;
 </code></pre>
 ]]></content>
   </entry>

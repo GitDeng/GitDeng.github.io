@@ -9,21 +9,7 @@
   <meta name="author" content="程序员笔记">
 
   
-  <meta name="description" content="跨应用绑定Service的目的就是为了数据通信，如果不进行数据通信，跨应用绑定Service也就没有意义了。 实现方法 （app中） 1 增加AIDL接口的抽象方法 1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-// IAppServiceRemoteBinder.aidl &hellip;">
+  <meta name="description" content="BroadcastReceiver简介 BroadcastReceiver 是Android 四大基本组件之一，用于接收广播信息，如：开屏、锁屏、短信等等，在实际工作中用途非常广泛。 动态注册和注销BroadcastReceiver 有的情况下， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +66,305 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/19/Dynamic%20registration%20and%20cancellation%20BroadcastReceiver/">动态注册和注销BroadcastReceiver</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-07-19T01:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>19</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>1:39 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>BroadcastReceiver简介</h2>
+
+<p>BroadcastReceiver 是Android 四大基本组件之一，用于接收广播信息，如：开屏、锁屏、短信等等，在实际工作中用途非常广泛。</p>
+
+<h2>动态注册和注销BroadcastReceiver</h2>
+
+<p>有的情况下，我们不希望BroadcastReceiver始终处于侦听状态，这时就需要会注册和注销BroadcastReceiver。</p>
+
+<h3>1 MainActivity.java</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.learnbroadcastreceiver;
+</span><span class='line'>
+</span><span class='line'>import android.content.Intent;
+</span><span class='line'>import android.content.IntentFilter;
+</span><span class='line'>import android.support.v7.app.ActionBarActivity;
+</span><span class='line'>import android.os.Bundle;
+</span><span class='line'>import android.view.View;
+</span><span class='line'>
+</span><span class='line'>public class MainActivity extends ActionBarActivity implements View.OnClickListener {
+</span><span class='line'>
+</span><span class='line'>    private MyReceiver receiver = null;
+</span><span class='line'>
+</span><span class='line'>    @Override
+</span><span class='line'>    protected void onCreate(Bundle savedInstanceState) {
+</span><span class='line'>        super.onCreate(savedInstanceState);
+</span><span class='line'>        setContentView(R.layout.activity_main);
+</span><span class='line'>
+</span><span class='line'>        findViewById(R.id.btnSendMsg).setOnClickListener(this);
+</span><span class='line'>        findViewById(R.id.btnReg).setOnClickListener(this);
+</span><span class='line'>        findViewById(R.id.btnUnreg).setOnClickListener(this);
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    @Override
+</span><span class='line'>    public void onClick(View v) {
+</span><span class='line'>        switch(v.getId()){
+</span><span class='line'>            case R.id.btnSendMsg:
+</span><span class='line'>//                Intent i = new Intent(this,MyReceiver.class);
+</span><span class='line'>                //这时只能隐式Intent传递数据了
+</span><span class='line'>                Intent i = new Intent(MyReceiver.ACTION);
+</span><span class='line'>                i.putExtra("data","JACK的机器人");
+</span><span class='line'>                sendBroadcast(i);
+</span><span class='line'>                break;
+</span><span class='line'>            case R.id.btnReg:
+</span><span class='line'>                //为避免重复注册操作，加入判断条件
+</span><span class='line'>                if(receiver == null){
+</span><span class='line'>                    //初始化receiver
+</span><span class='line'>                    receiver = new MyReceiver();
+</span><span class='line'>                    registerReceiver(receiver,new IntentFilter(MyReceiver.ACTION));
+</span><span class='line'>                    System.out.println("注册了接收器");
+</span><span class='line'>                }
+</span><span class='line'>                break;
+</span><span class='line'>            case R.id.btnUnreg:
+</span><span class='line'>                if(receiver != null){
+</span><span class='line'>                    unregisterReceiver(receiver);
+</span><span class='line'>                    receiver = null;
+</span><span class='line'>                    System.out.println("注消了接收器");
+</span><span class='line'>                }
+</span><span class='line'>                break;
+</span><span class='line'>        }
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2 MyReceiver.java</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.learnbroadcastreceiver;
+</span><span class='line'>
+</span><span class='line'>import android.content.BroadcastReceiver;
+</span><span class='line'>import android.content.Context;
+</span><span class='line'>import android.content.Intent;
+</span><span class='line'>
+</span><span class='line'>public class MyReceiver extends BroadcastReceiver {
+</span><span class='line'>
+</span><span class='line'>    public static final String ACTION = "cn.loverobots.learnbroadcastreceiver.intent.action.MyReceiver";
+</span><span class='line'>
+</span><span class='line'>    public MyReceiver() {
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    @Override
+</span><span class='line'>    public void onReceive(Context context, Intent intent) {
+</span><span class='line'>        System.out.println("接收到了消息，消息的内容是："+intent.getStringExtra("data"));
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>3 activity_main.xml</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+</span><span class='line'>    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+</span><span class='line'>    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+</span><span class='line'>    android:paddingRight="@dimen/activity_horizontal_margin"
+</span><span class='line'>    android:paddingTop="@dimen/activity_vertical_margin"
+</span><span class='line'>    android:paddingBottom="@dimen/activity_vertical_margin"
+</span><span class='line'>    android:orientation="vertical"
+</span><span class='line'>    tools:context=".MainActivity"&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;TextView
+</span><span class='line'>        android:text="@string/hello_world"
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content" /&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;Button
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:text="发送消息"
+</span><span class='line'>        android:id="@+id/btnSendMsg" /&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;Button
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:text="注册接收器"
+</span><span class='line'>        android:id="@+id/btnReg" /&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;Button
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:text="注销接收器"
+</span><span class='line'>        android:id="@+id/btnUnreg" /&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;/LinearLayout&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>4 AndroidMainfest.xml</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+</span><span class='line'>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+</span><span class='line'>    package="cn.loverobots.learnbroadcastreceiver" &gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;application
+</span><span class='line'>        android:allowBackup="true"
+</span><span class='line'>        android:icon="@mipmap/ic_launcher"
+</span><span class='line'>        android:label="@string/app_name"
+</span><span class='line'>        android:theme="@style/AppTheme" &gt;
+</span><span class='line'>        &lt;activity
+</span><span class='line'>            android:name=".MainActivity"
+</span><span class='line'>            android:label="@string/app_name" &gt;
+</span><span class='line'>            &lt;intent-filter&gt;
+</span><span class='line'>                &lt;action android:name="android.intent.action.MAIN" /&gt;
+</span><span class='line'>
+</span><span class='line'>                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+</span><span class='line'>            &lt;/intent-filter&gt;
+</span><span class='line'>        &lt;/activity&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;/application&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;/manifest&gt;</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -3460,129 +3745,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/07/10/Start-the-local-Activity-by-the-browser-link/">通过浏览器链接启动本地Activity</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2015-07-10T06:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>6:39 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>1 AndroidManifest.xml</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;activity
-</span><span class='line'>    android:name=".LocalAppAty"
-</span><span class='line'>    android:label="@string/title_activity_local_app_aty" &gt;
-</span><span class='line'>    &lt;intent-filter&gt;
-</span><span class='line'>        &lt;!-- 设置浏览器可启动 --&gt;
-</span><span class='line'>        &lt;category android:name="android.intent.category.BROWSABLE"/&gt;
-</span><span class='line'>        &lt;!-- 设置默认启动Activity --&gt;
-</span><span class='line'>        &lt;category android:name="android.intent.category.DEFAULT"/&gt;
-</span><span class='line'>        &lt;!-- 浏览器链接被点击后，会发送一个View的action --&gt;
-</span><span class='line'>        &lt;action android:name="android.intent.action.VIEW"/&gt;
-</span><span class='line'>        &lt;!-- 设置协议为app --&gt;
-</span><span class='line'>        &lt;data android:scheme="app"/&gt;
-</span><span class='line'>    &lt;/intent-filter&gt;
-</span><span class='line'>&lt;/activity&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>2 LocalAppAty.java</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>@Override
-</span><span class='line'>protected void onCreate(Bundle savedInstanceState) {
-</span><span class='line'>    super.onCreate(savedInstanceState);
-</span><span class='line'>    setContentView(R.layout.activity_local_app_aty);
-</span><span class='line'>    //接收从浏览器传过来的参数，接收到的是一个Uri（android.net）对象
-</span><span class='line'>    Uri uri = getIntent().getData();
-</span><span class='line'>  //通过浏览器链接打开应用后，会在控制台输出html页面中链接的uri地址“I/System.out﹕app://hello”
-</span><span class='line'>    System.out.println(uri);
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>3 写一个带链接的静态页面（test.html）</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;!doctype html&gt;
-</span><span class='line'>    &lt;html lang="en"&gt;
-</span><span class='line'>    &lt;head&gt;
-</span><span class='line'>        &lt;meta charset="UTF-8"&gt;
-</span><span class='line'>        &lt;meta name="Generator" content="EditPlus®"&gt;
-</span><span class='line'>        &lt;meta name="Author" content=""&gt;
-</span><span class='line'>        &lt;meta name="Keywords" content=""&gt;
-</span><span class='line'>        &lt;meta name="Description" content=""&gt;
-</span><span class='line'>        &lt;style&gt;
-</span><span class='line'>        a{
-</span><span class='line'>            font-size:50pt;
-</span><span class='line'>        }
-</span><span class='line'>        &lt;/style&gt;
-</span><span class='line'>        &lt;title&gt;Document&lt;/title&gt;
-</span><span class='line'>    &lt;/head&gt;
-</span><span class='line'>    &lt;body&gt;
-</span><span class='line'>      &lt;a href="app://hello"&gt;Launch My App&lt;/a&gt;
-</span><span class='line'>    &lt;/body&gt;
-</span><span class='line'>&lt;/html&gt;</span></code></pre></td></tr></table></div></figure>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; 前一页</a>
@@ -3598,6 +3760,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/07/19/Dynamic%20registration%20and%20cancellation%20BroadcastReceiver/">动态注册和注销BroadcastReceiver</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/07/18/Cross-application-binding-Service-and-communication/">跨应用绑定Servic并通信</a>
       </li>
     
@@ -3611,10 +3777,6 @@
     
       <li class="post">
         <a href="/blog/2015/07/14/Service-is-bound-to-communicate-how-to-listen-to-the-internal-state-of-the-Service/">绑定Service进行通信（如何侦听Service的内部状态）</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/07/13/Bind-Service-and-communicate-via-Binder/">绑定Service通信（Binder方式）</a>
       </li>
     
   </ul>

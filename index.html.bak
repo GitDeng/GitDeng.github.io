@@ -9,7 +9,7 @@
   <meta name="author" content="程序员笔记">
 
   
-  <meta name="description" content=" Blog Archives Recent Posts 跨应用绑定Servic并通信 跨应用绑定Service 跨应用启动Service 绑定Service进行通信（如何侦听Service的内部状态） 绑定Service通信（Binder方式） ">
+  <meta name="description" content=" Blog Archives Recent Posts 动态注册和注销BroadcastReceiver 跨应用绑定Servic并通信 跨应用绑定Service 跨应用启动Service 绑定Service进行通信（如何侦听Service的内部状态） ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +80,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/07/19/Dynamic%20registration%20and%20cancellation%20BroadcastReceiver/">动态注册和注销BroadcastReceiver</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/07/18/Cross-application-binding-Service-and-communication/">跨应用绑定Servic并通信</a>
       </li>
     
@@ -93,10 +97,6 @@
     
       <li class="post">
         <a href="/blog/2015/07/14/Service-is-bound-to-communicate-how-to-listen-to-the-internal-state-of-the-Service/">绑定Service进行通信（如何侦听Service的内部状态）</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/07/13/Bind-Service-and-communicate-via-Binder/">绑定Service通信（Binder方式）</a>
       </li>
     
   </ul>

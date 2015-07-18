@@ -9,7 +9,21 @@
   <meta name="author" content="程序员笔记">
 
   
-  <meta name="description" content="官方文档说明图 ">
+  <meta name="description" content="简单数据传递 1 MainActivity 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+@Override
+protected void onCreate(Bundle savedInstanceState) { super.onCreate(savedInstanceState &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -66,6 +80,177 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/08/Simple-data-and-packet-transfer-between-Activity/">Activity之间的简单数据及数据包传递</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-07-08T07:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>8</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>7:39 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>简单数据传递</h2>
+
+<h3>1 MainActivity</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>@Override
+</span><span class='line'>protected void onCreate(Bundle savedInstanceState) {
+</span><span class='line'>    super.onCreate(savedInstanceState);
+</span><span class='line'>    setContentView(R.layout.activity_main);
+</span><span class='line'>    findViewById(R.id.btnStartAty).setOnClickListener(new View.OnClickListener() {
+</span><span class='line'>        @Override
+</span><span class='line'>        public void onClick(View v) {
+</span><span class='line'>            Intent i = new Intent(MainActivity.this,TheAty.class);
+</span><span class='line'>            i.putExtra("data","Hello Loverobots");
+</span><span class='line'>            startActivity(i);
+</span><span class='line'>        }
+</span><span class='line'>    });
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2 TheAty</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>private TextView tv;
+</span><span class='line'>
+</span><span class='line'>@Override
+</span><span class='line'>protected void onCreate(Bundle savedInstanceState) {
+</span><span class='line'>    super.onCreate(savedInstanceState);
+</span><span class='line'>    setContentView(R.layout.activity_the_aty);
+</span><span class='line'>    tv = (TextView) findViewById(R.id.tv);
+</span><span class='line'>    Intent i = getIntent();
+</span><span class='line'>    tv.setText(i.getStringExtra("data"));//i.putExtra("data","Hello Loverobots");的接收方法，简单传递参数
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>数据包传递</h2>
+
+<h3>1 MainActivity</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>@Override
+</span><span class='line'>protected void onCreate(Bundle savedInstanceState) {
+</span><span class='line'>    super.onCreate(savedInstanceState);
+</span><span class='line'>    setContentView(R.layout.activity_main);
+</span><span class='line'>
+</span><span class='line'>    findViewById(R.id.btnStartAty).setOnClickListener(new View.OnClickListener() {
+</span><span class='line'>
+</span><span class='line'>        @Override
+</span><span class='line'>        public void onClick(View v) {
+</span><span class='line'>            Intent i = new Intent(MainActivity.this,TheAty.class);
+</span><span class='line'>            Bundle b = new Bundle();
+</span><span class='line'>            b.putString("name","loverobots");
+</span><span class='line'>            b.putInt("age",20);
+</span><span class='line'>            b.putString("name1","jackrobot");
+</span><span class='line'>//                i.putExtras(b);
+</span><span class='line'>            i.putExtra("data",b);
+</span><span class='line'>
+</span><span class='line'>            startActivity(i);
+</span><span class='line'>        }
+</span><span class='line'>    });
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2 TheAty</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>private TextView tv;
+</span><span class='line'>
+</span><span class='line'>@Override
+</span><span class='line'>protected void onCreate(Bundle savedInstanceState) {
+</span><span class='line'>    super.onCreate(savedInstanceState);
+</span><span class='line'>    setContentView(R.layout.activity_the_aty);
+</span><span class='line'>    tv = (TextView) findViewById(R.id.tv);
+</span><span class='line'>
+</span><span class='line'>    Intent i = getIntent();
+</span><span class='line'>//        Bundle data = i.getExtras();//i.putExtras(b);对应的接收方法
+</span><span class='line'>    Bundle data = i.getBundleExtra("data");//i.putExtra("data",b);对应的接收方法
+</span><span class='line'>
+</span><span class='line'>    tv.setText(String.format("name=%s , age=%d , name1=%s",
+</span><span class='line'>               data.getString("name"),
+</span><span class='line'>               data.getInt("age"),
+</span><span class='line'>               data.getString("name1", "jack")));//这种形式中，如果name1不存在，则采用默认值jack
+</span><span class='line'>    tv.setText(String.format("User info(name=%s , age=%d)",user.getName(),user.getAge()));
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -621,6 +806,10 @@ Android的应用开发层使用的语言是Java。</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/07/19/Dynamic%20registration%20and%20cancellation%20BroadcastReceiver/">动态注册和注销BroadcastReceiver</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/07/18/Cross-application-binding-Service-and-communication/">跨应用绑定Servic并通信</a>
       </li>
     
@@ -634,10 +823,6 @@ Android的应用开发层使用的语言是Java。</p>
     
       <li class="post">
         <a href="/blog/2015/07/14/Service-is-bound-to-communicate-how-to-listen-to-the-internal-state-of-the-Service/">绑定Service进行通信（如何侦听Service的内部状态）</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/07/13/Bind-Service-and-communicate-via-Binder/">绑定Service通信（Binder方式）</a>
       </li>
     
   </ul>

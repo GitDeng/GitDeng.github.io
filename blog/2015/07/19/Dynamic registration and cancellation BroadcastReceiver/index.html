@@ -5,44 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>启动Service并传递数据 - 程序员笔记</title>
+  <title>动态注册和注销BroadcastReceiver - 程序员笔记</title>
   <meta name="author" content="程序员笔记">
 
   
-  <meta name="description" content="示例代码 1 MainActivity（继承Activity,实现View.OnClickListener接口） 1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34 &hellip;">
+  <meta name="description" content="BroadcastReceiver简介 BroadcastReceiver 是Android 四大基本组件之一，用于接收广播信息，如：开屏、锁屏、短信等等，在实际工作中用途非常广泛。 动态注册和注销BroadcastReceiver 有的情况下， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -51,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://gitdeng.github.io/blog/2015/07/13/Start-Service-and-transfer-data/">
+  <link rel="canonical" href="http://gitdeng.github.io/blog/2015/07/19/Dynamic%20registration%20and%20cancellation%20BroadcastReceiver/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="程序员笔记" type="application/atom+xml">
@@ -102,7 +69,7 @@
   
   <header>
     
-      <h1 class="entry-title">启动Service并传递数据</h1>
+      <h1 class="entry-title">动态注册和注销BroadcastReceiver</h1>
     
     
       <p class="meta">
@@ -111,98 +78,22 @@
 
 
 
-<time class='entry-date' datetime='2015-07-13T02:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>2:39 am</span></time>
+<time class='entry-date' datetime='2015-07-19T01:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>19</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>1:39 am</span></time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><h2>示例代码</h2>
+<div class="entry-content"><h2>BroadcastReceiver简介</h2>
 
-<h3>1 MainActivity（继承Activity,实现View.OnClickListener接口）</h3>
+<p>BroadcastReceiver 是Android 四大基本组件之一，用于接收广播信息，如：开屏、锁屏、短信等等，在实际工作中用途非常广泛。</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.connectservice;
-</span><span class='line'>
-</span><span class='line'>import android.content.Intent;
-</span><span class='line'>import android.support.v7.app.ActionBarActivity;
-</span><span class='line'>import android.os.Bundle;
-</span><span class='line'>import android.view.View;
-</span><span class='line'>import android.widget.EditText;
-</span><span class='line'>
-</span><span class='line'>public class MainActivity extends ActionBarActivity implements View.OnClickListener {
-</span><span class='line'>
-</span><span class='line'>    private EditText editText;
-</span><span class='line'>    private Intent intent;
-</span><span class='line'>
-</span><span class='line'>    @Override
-</span><span class='line'>    protected void onCreate(Bundle savedInstanceState) {
-</span><span class='line'>        super.onCreate(savedInstanceState);
-</span><span class='line'>        setContentView(R.layout.activity_main);
-</span><span class='line'>        editText = (EditText) findViewById(R.id.editText);
-</span><span class='line'>        findViewById(R.id.btnStartService).setOnClickListener(this);
-</span><span class='line'>        findViewById(R.id.btnStopService).setOnClickListener(this);
-</span><span class='line'>    }
-</span><span class='line'>
-</span><span class='line'>    @Override
-</span><span class='line'>    public void onClick(View v) {
-</span><span class='line'>        switch (v.getId()){
-</span><span class='line'>            case R.id.btnStartService:
-</span><span class='line'>                System.out.println("启动服务");
-</span><span class='line'>                intent = new Intent(this,MyService.class);
-</span><span class='line'>                //传递名为“etData”的字符串类型的数据
-</span><span class='line'>                intent.putExtra("etData", editText.getText().toString());
-</span><span class='line'>                startService(intent);
-</span><span class='line'>                break;
-</span><span class='line'>            case R.id.btnStopService:
-</span><span class='line'>                System.out.println("停止服务");
-</span><span class='line'>                stopService(new Intent(this,MyService.class));
-</span><span class='line'>                break;
-</span><span class='line'>        }
-</span><span class='line'>    }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+<h2>动态注册和注销BroadcastReceiver</h2>
 
+<p>有的情况下，我们不希望BroadcastReceiver始终处于侦听状态，这时就需要会注册和注销BroadcastReceiver。</p>
 
-<h3>2 MyService（继承Service）</h3>
+<h3>1 MainActivity.java</h3>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -255,59 +146,95 @@
 <span class='line-number'>49</span>
 <span class='line-number'>50</span>
 <span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.connectservice;
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.learnbroadcastreceiver;
 </span><span class='line'>
-</span><span class='line'>import android.app.Service;
 </span><span class='line'>import android.content.Intent;
-</span><span class='line'>import android.os.Binder;
-</span><span class='line'>import android.os.IBinder;
+</span><span class='line'>import android.content.IntentFilter;
+</span><span class='line'>import android.support.v7.app.ActionBarActivity;
+</span><span class='line'>import android.os.Bundle;
+</span><span class='line'>import android.view.View;
 </span><span class='line'>
-</span><span class='line'>public class MyService extends Service {
-</span><span class='line'>    private static boolean ServiceRunning = false;
-</span><span class='line'>    private String etData = "默认文本";
+</span><span class='line'>public class MainActivity extends ActionBarActivity implements View.OnClickListener {
 </span><span class='line'>
-</span><span class='line'>    public MyService() {
+</span><span class='line'>    private MyReceiver receiver = null;
+</span><span class='line'>
+</span><span class='line'>    @Override
+</span><span class='line'>    protected void onCreate(Bundle savedInstanceState) {
+</span><span class='line'>        super.onCreate(savedInstanceState);
+</span><span class='line'>        setContentView(R.layout.activity_main);
+</span><span class='line'>
+</span><span class='line'>        findViewById(R.id.btnSendMsg).setOnClickListener(this);
+</span><span class='line'>        findViewById(R.id.btnReg).setOnClickListener(this);
+</span><span class='line'>        findViewById(R.id.btnUnreg).setOnClickListener(this);
 </span><span class='line'>    }
 </span><span class='line'>
 </span><span class='line'>    @Override
-</span><span class='line'>    public IBinder onBind(Intent intent) {
-</span><span class='line'>        return new Binder();
-</span><span class='line'>    }
-</span><span class='line'>
-</span><span class='line'>    @Override
-</span><span class='line'>    public int onStartCommand(Intent intent, int flags, int startId) {
-</span><span class='line'>        etData = intent.getStringExtra("etData");
-</span><span class='line'>        return super.onStartCommand(intent, flags, startId);
-</span><span class='line'>    }
-</span><span class='line'>
-</span><span class='line'>    @Override
-</span><span class='line'>    public void onCreate() {
-</span><span class='line'>        super.onCreate();
-</span><span class='line'>        System.out.println("服务创建");
-</span><span class='line'>        ServiceRunning = true;
-</span><span class='line'>        new Thread(){
-</span><span class='line'>            @Override
-</span><span class='line'>            public void run() {
-</span><span class='line'>                super.run();
-</span><span class='line'>                while (ServiceRunning){
-</span><span class='line'>                    System.out.println(etData);
-</span><span class='line'>                    try {
-</span><span class='line'>                        sleep(1000);
-</span><span class='line'>                    } catch (InterruptedException e) {
-</span><span class='line'>                        e.printStackTrace();
-</span><span class='line'>                    }
+</span><span class='line'>    public void onClick(View v) {
+</span><span class='line'>        switch(v.getId()){
+</span><span class='line'>            case R.id.btnSendMsg:
+</span><span class='line'>//                Intent i = new Intent(this,MyReceiver.class);
+</span><span class='line'>                //这时只能隐式Intent传递数据了
+</span><span class='line'>                Intent i = new Intent(MyReceiver.ACTION);
+</span><span class='line'>                i.putExtra("data","JACK的机器人");
+</span><span class='line'>                sendBroadcast(i);
+</span><span class='line'>                break;
+</span><span class='line'>            case R.id.btnReg:
+</span><span class='line'>                //为避免重复注册操作，加入判断条件
+</span><span class='line'>                if(receiver == null){
+</span><span class='line'>                    //初始化receiver
+</span><span class='line'>                    receiver = new MyReceiver();
+</span><span class='line'>                    registerReceiver(receiver,new IntentFilter(MyReceiver.ACTION));
+</span><span class='line'>                    System.out.println("注册了接收器");
 </span><span class='line'>                }
-</span><span class='line'>            }
-</span><span class='line'>        }.start();
+</span><span class='line'>                break;
+</span><span class='line'>            case R.id.btnUnreg:
+</span><span class='line'>                if(receiver != null){
+</span><span class='line'>                    unregisterReceiver(receiver);
+</span><span class='line'>                    receiver = null;
+</span><span class='line'>                    System.out.println("注消了接收器");
+</span><span class='line'>                }
+</span><span class='line'>                break;
+</span><span class='line'>        }
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2 MyReceiver.java</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.learnbroadcastreceiver;
+</span><span class='line'>
+</span><span class='line'>import android.content.BroadcastReceiver;
+</span><span class='line'>import android.content.Context;
+</span><span class='line'>import android.content.Intent;
+</span><span class='line'>
+</span><span class='line'>public class MyReceiver extends BroadcastReceiver {
+</span><span class='line'>
+</span><span class='line'>    public static final String ACTION = "cn.loverobots.learnbroadcastreceiver.intent.action.MyReceiver";
+</span><span class='line'>
+</span><span class='line'>    public MyReceiver() {
 </span><span class='line'>    }
 </span><span class='line'>
 </span><span class='line'>    @Override
-</span><span class='line'>    public void onDestroy() {
-</span><span class='line'>        super.onDestroy();
-</span><span class='line'>        System.out.println("服务停止");
-</span><span class='line'>        ServiceRunning = false;
+</span><span class='line'>    public void onReceive(Context context, Intent intent) {
+</span><span class='line'>        System.out.println("接收到了消息，消息的内容是："+intent.getStringExtra("data"));
 </span><span class='line'>    }
 </span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
 
@@ -341,6 +268,12 @@
 <span class='line-number'>25</span>
 <span class='line-number'>26</span>
 <span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 </span><span class='line'>    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
 </span><span class='line'>    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
@@ -349,25 +282,79 @@
 </span><span class='line'>    android:paddingBottom="@dimen/activity_vertical_margin"
 </span><span class='line'>    android:orientation="vertical"
 </span><span class='line'>    tools:context=".MainActivity"&gt;
-</span><span class='line'>    
-</span><span class='line'>    &lt;EditText
-</span><span class='line'>        android:layout_width="match_parent"
-</span><span class='line'>        android:layout_height="wrap_content"
-</span><span class='line'>        android:text="默认文本"
-</span><span class='line'>        android:id="@+id/editText" /&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;TextView
+</span><span class='line'>        android:text="@string/hello_world"
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content" /&gt;
 </span><span class='line'>
 </span><span class='line'>    &lt;Button
 </span><span class='line'>        android:layout_width="wrap_content"
 </span><span class='line'>        android:layout_height="wrap_content"
-</span><span class='line'>        android:text="启动服务"
-</span><span class='line'>        android:id="@+id/btnStartService" /&gt;
+</span><span class='line'>        android:text="发送消息"
+</span><span class='line'>        android:id="@+id/btnSendMsg" /&gt;
 </span><span class='line'>
 </span><span class='line'>    &lt;Button
 </span><span class='line'>        android:layout_width="wrap_content"
 </span><span class='line'>        android:layout_height="wrap_content"
-</span><span class='line'>        android:text="停止服务"
-</span><span class='line'>        android:id="@+id/btnStopService" /&gt;
+</span><span class='line'>        android:text="注册接收器"
+</span><span class='line'>        android:id="@+id/btnReg" /&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;Button
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:text="注销接收器"
+</span><span class='line'>        android:id="@+id/btnUnreg" /&gt;
+</span><span class='line'>
 </span><span class='line'>&lt;/LinearLayout&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>4 AndroidMainfest.xml</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+</span><span class='line'>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+</span><span class='line'>    package="cn.loverobots.learnbroadcastreceiver" &gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;application
+</span><span class='line'>        android:allowBackup="true"
+</span><span class='line'>        android:icon="@mipmap/ic_launcher"
+</span><span class='line'>        android:label="@string/app_name"
+</span><span class='line'>        android:theme="@style/AppTheme" &gt;
+</span><span class='line'>        &lt;activity
+</span><span class='line'>            android:name=".MainActivity"
+</span><span class='line'>            android:label="@string/app_name" &gt;
+</span><span class='line'>            &lt;intent-filter&gt;
+</span><span class='line'>                &lt;action android:name="android.intent.action.MAIN" /&gt;
+</span><span class='line'>
+</span><span class='line'>                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+</span><span class='line'>            &lt;/intent-filter&gt;
+</span><span class='line'>        &lt;/activity&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;/application&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;/manifest&gt;</span></code></pre></td></tr></table></div></figure>
 
 </div>
 
@@ -384,12 +371,12 @@
 
 
 
-<time class='entry-date' datetime='2015-07-13T02:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>2:39 am</span></time>
+<time class='entry-date' datetime='2015-07-19T01:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>19</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>1:39 am</span></time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/android/'>android</a>, <a class='category' href='/blog/categories/android-basic/'>android_basic</a>, <a class='category' href='/blog/categories/service/'>service</a>
+    <a class='category' href='/blog/categories/aidl/'>aidl</a>, <a class='category' href='/blog/categories/android/'>android</a>, <a class='category' href='/blog/categories/android-basic/'>android_basic</a>, <a class='category' href='/blog/categories/service/'>service</a>
   
 </span>
 
@@ -405,10 +392,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2015/07/13/Service-Android/" title="Previous Post: 认识Android Service">&laquo; 认识Android Service</a>
+        <a class="basic-alignment left" href="/blog/2015/07/18/Cross-application-binding-Service-and-communication/" title="Previous Post: 跨应用绑定Servic并通信">&laquo; 跨应用绑定Servic并通信</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2015/07/13/Bind-Service-and-communicate-via-Binder/" title="Next Post: 绑定Service通信（Binder方式）">绑定Service通信（Binder方式） &raquo;</a>
       
     </p>
   </footer>
