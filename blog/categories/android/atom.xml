@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android | 程序员笔记]]></title>
   <link href="http://gitdeng.github.io/blog/categories/android/atom.xml" rel="self"/>
   <link href="http://gitdeng.github.io/"/>
-  <updated>2015-07-18T16:10:39+08:00</updated>
+  <updated>2015-07-18T17:02:12+08:00</updated>
   <id>http://gitdeng.github.io/</id>
   <author>
     <name><![CDATA[程序员笔记]]></name>
@@ -12,6 +12,201 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[跨应用启动Service]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/18/Cross-application-binding-Service/"/>
+    <updated>2015-07-18T02:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/18/Cross-application-binding-Service</id>
+    <content type="html"><![CDATA[<h2>1 建立AIDL服务的步骤</h2>
+
+<p>建立AIDL服务要比建立普通的服务复杂一些，具体步骤如下：<br/>
+2.1 在Eclipse Android工程的Java包目录中建立一个扩展名为aidl的文件。该文件的语法类似于Java代码，但会稍有不同。<br/>
+2.2 如果aidl文件的内容是正确的，ADT会自动生成一个Java接口文件（*.java）。<br/>
+2.3 建立一个服务类（Service的子类）。<br/>
+2.4 实现由aidl文件生成的Java接口。<br/>
+2.5 在AndroidManifest.xml文件中配置AIDL服务，尤其要注意的是，<action>标签中android:name的属性值就是客户端要引用该服务的ID，也就是Intent类的参数值。</p>
+
+<h2>2 跨应用绑定Service</h2>
+
+<p>无法从其它的应用程序里面访问另一个应用程序里面的某一个类的定义，所以Android专门提供了一种机制，即AIDL——Android接口定义语言。</p>
+
+<h3>2.1 创建aidl文件(IAppServiceRemoteBinder.aidl)</h3>
+
+<p>模块名上右键创建AIDL File
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>// IAppServiceRemoteBinder.aidl
+</span><span class='line'>package cn.loverobots.startservicefromanotherapp;&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;// Declare any non-default types here with import statements
+</span><span class='line'>//步骤1 创建aidl文件
+</span><span class='line'>interface IAppServiceRemoteBinder {
+</span><span class='line'>    /&lt;em&gt;*
+</span><span class='line'>     * Demonstrates some basic types that you can use as parameters
+</span><span class='line'>     * and return values in AIDL.
+</span><span class='line'>     &lt;/em&gt;/
+</span><span class='line'>    void basicTypes(int anInt, long aLong, boolean aBoolean, float aFloat,
+</span><span class='line'>            double aDouble, String aString);
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure></p>
+
+<h3>2.2 当前模块下的AppService类实现aidl接口</h3>
+
+<pre><code>package cn.loverobots.startservicefromanotherapp;
+
+import android.app.Service;
+import android.content.Intent;
+import android.os.IBinder;
+import android.os.RemoteException;
+
+public class AppService extends Service {
+    public AppService() {
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        //步骤2 实现aidl接口
+        return new IAppServiceRemoteBinder.Stub() {
+            @Override
+            public void basicTypes(int anInt, long aLong, boolean aBoolean, float aFloat, double aDouble, String aString) throws RemoteException {
+
+            }
+        };
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        System.out.println("Service Started");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        System.out.println("Service Destroyed");
+    }
+}
+</code></pre>
+
+<h3>2.3 在anotherapp中布局文件（activity_main.xml）添加绑定及解绑服务按钮</h3>
+
+<pre><code>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    tools:context=".MainActivity"&gt;
+
+    &lt;TextView
+        android:text="跨应用启动服务测试"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="启动外部服务"
+        android:id="@+id/btnStartService" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="停止外部服务"
+        android:id="@+id/btnStopService" /&gt;
+    &lt;!--步骤3 添加绑定及解绑服务按钮--&gt;
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="绑定外部服务"
+        android:id="@+id/btnBindAppService" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="解除绑定外部服务"
+        android:id="@+id/btnUnbindAppService" /&gt;
+&lt;/LinearLayout&gt;
+</code></pre>
+
+<h3>2.4 给按钮添加监听事件响应(anotherapp中的MainActivity.java)</h3>
+
+<pre><code>package cn.loverobots.anotherapp;
+
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
+import android.support.v7.app.ActionBarActivity;
+import android.os.Bundle;
+import android.view.View;
+
+public class MainActivity extends ActionBarActivity implements View.OnClickListener, ServiceConnection {
+
+    private Intent ServiceIntent;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        ServiceIntent = new Intent();
+        //显式Intent方式启动Service
+        ServiceIntent.setComponent(new ComponentName("cn.loverobots.startservicefromanotherapp","cn.loverobots.startservicefromanotherapp.AppService"));
+
+        findViewById(R.id.btnStartService).setOnClickListener(this);
+        findViewById(R.id.btnStopService).setOnClickListener(this);
+        //步骤4
+        findViewById(R.id.btnBindAppService).setOnClickListener(this);
+        findViewById(R.id.btnUnbindAppService).setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.btnStartService:
+                startService(ServiceIntent);
+                break;
+            case R.id.btnStopService:
+                stopService(ServiceIntent);
+                break;
+            //步骤5
+            case R.id.btnBindAppService:
+                bindService(ServiceIntent,this, Context.BIND_AUTO_CREATE);
+                break;
+            case R.id.btnUnbindAppService:
+                unbindService(this);
+                break;
+        }
+    }
+    //步骤6
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder service) {
+        System.out.println("Bind Service");
+        System.out.println(service);
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+        System.out.println("Unbind Service");
+    }
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[跨应用启动Service]]></title>
@@ -25,16 +220,7 @@
 <p>Android系统中的进程之间不能共享内存，因此，需要提供一些机制在不同进程之间进行数据通信。为了使其他的应用程序也可以访问本应用程序提供的服务，Android系统采用了远程过程调用（Remote Procedure Call，RPC）方式来实现。与很多其他的基于RPC的解决方案一样，Android使用一种接口定义语言（Interface Definition Language，IDL）来公开服务的接口。<br/>
 我们知道4个Android应用程序组件中的3个（Activity、BroadcastReceiver和ContentProvider）都可以进行跨进程访问，另外一个Android应用程序组件Service同样可以。因此，可以将这种可以跨进程访问的服务称为AIDL（Android Interface Definition Language）服务。</p>
 
-<h3>2 建立AIDL服务的步骤</h3>
-
-<p>建立AIDL服务要比建立普通的服务复杂一些，具体步骤如下：<br/>
-2.1 在Eclipse Android工程的Java包目录中建立一个扩展名为aidl的文件。该文件的语法类似于Java代码，但会稍有不同。
-2.2 如果aidl文件的内容是正确的，ADT会自动生成一个Java接口文件（*.java）。
-2.3 建立一个服务类（Service的子类）。
-2.4 实现由aidl文件生成的Java接口。
-2.5 在AndroidManifest.xml文件中配置AIDL服务，尤其要注意的是，<action>标签中android:name的属性值就是客户端要引用该服务的ID，也就是Intent类的参数值。</p>
-
-<h3>3 跨应用启动Service</h3>
+<h3>2 跨应用启动Service</h3>
 
 <p>从Android 5.0开始，如果想启动服务，必须使用显式Intent，不能够使用隐式Intent。</p>
 
@@ -807,247 +993,6 @@ public class MyService extends Service {
         android:text="停止服务"
         android:id="@+id/btnStopService" /&gt;
 &lt;/LinearLayout&gt;
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[认识Android Service]]></title>
-    <link href="http://gitdeng.github.io/blog/2015/07/13/Service-Android/"/>
-    <updated>2015-07-13T01:39:20+08:00</updated>
-    <id>http://gitdeng.github.io/blog/2015/07/13/Service-Android</id>
-    <content type="html"><![CDATA[<h2>1 使用Service</h2>
-
-<h3>1.1 认识Service</h3>
-
-<p>Service与Activity的地位是并列的，它代表一个单独的Android组件。Service与Activity的区别在于：Service通常位于后台运行，它一般不需要与用户交互，因此Service组件没有图形用户界面。
-与Activity组件需要继承Activity基类类似，Service组件需要继承Service基类。一个Service组件被运行起来之后，它将拥有自己独立的生命周期，Service组件通常用于为其他组件提供后台服务或监控其他组件的运行状态。</p>
-
-<h3>1.2 使用场景</h3>
-
-<p>不需要有可以与用户交互的界面，只需要在后台一直运行，做一些事务的处理，比如说Socket超链接、Http的网络通信以及与服务器保持推送的一个链接。<br/>
-<strong>注意</strong>：Service实例在一个应用程序中只能有一个。</p>
-
-<h2>2 绑定Service</h2>
-
-<p>启动服务也可以通过绑定服务的方式启动。</p>
-
-<h2>3 使用与绑定Service示例代码</h2>
-
-<h3>3.1 MainActivity（继承Activity，实现View.OnClickListener, ServiceConnection）</h3>
-
-<pre><code>package cn.loverobots.learnservice;
-
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.IBinder;
-import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
-import android.view.View;
-
-public class MainActivity extends ActionBarActivity implements View.OnClickListener, ServiceConnection {
-
-    private Intent intent;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        intent = new Intent(MainActivity.this,MyService.class);
-        //启动Service
-        findViewById(R.id.btnStartService).setOnClickListener(this);
-        //停止Service
-        findViewById(R.id.btnStopService).setOnClickListener(this);
-        //绑定Service
-        findViewById(R.id.btnBindService).setOnClickListener(this);
-        //解除绑定Service
-        findViewById(R.id.btnUnbindService).setOnClickListener(this);
-    }
-    //实现OnClickListener接口需要重写的方法
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()){
-            case R.id.btnStartService:
-                startService(intent);
-                break;
-            case R.id.btnStopService:
-                stopService(intent);
-                break;
-            case R.id.btnBindService:
-                bindService(intent,this, Context.BIND_AUTO_CREATE);
-                break;
-            case R.id.btnUnbindService:
-                unbindService(this);
-                break;
-        }
-    }
-    //实现ServiceConnection接口需要重写的方法
-    //服务被绑定成功执行
-    @Override
-    public void onServiceConnected(ComponentName name, IBinder service) {
-        System.out.println("Service Connected");
-    }
-    //实现ServiceConnection接口需要重写的方法
-    //服务解除绑定或者被杀掉时执行
-    @Override
-    public void onServiceDisconnected(ComponentName name) {
-
-    }
-}
-</code></pre>
-
-<h3>3.2 activity_main.xml</h3>
-
-<pre><code>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:orientation="vertical"
-    tools:context=".MainActivity"&gt;
-
-    &lt;TextView android:text="@string/hello_world" android:layout_width="wrap_content"
-        android:layout_height="wrap_content" /&gt;
-
-    &lt;Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="启动服务"
-        android:id="@+id/btnStartService" /&gt;
-
-    &lt;Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="停止服务"
-        android:id="@+id/btnStopService" /&gt;
-
-    &lt;Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="绑定服务"
-        android:id="@+id/btnBindService" /&gt;
-
-    &lt;Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="解除绑定服务"
-        android:id="@+id/btnUnbindService" /&gt;
-
-&lt;/LinearLayout&gt;
-</code></pre>
-
-<h3>3.3 MyService（继承Service）</h3>
-
-<pre><code>package cn.loverobots.learnservice;
-
-import android.app.Service;
-import android.content.Intent;
-import android.os.Binder;
-import android.os.IBinder;
-
-public class MyService extends Service {
-    public MyService() {
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        //返回一个实现了IBinder接口的对象
-        return new Binder();
-    }
-    //服务启动时所执行的命令示例
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        new Thread() {
-            @Override
-            public void run() {
-                super.run();
-                while (true) {
-                    System.out.println("服务正在运行...");
-                    try {
-                        sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }.start();
-
-        return super.onStartCommand(intent, flags, startId);
-    }
-}
-</code></pre>
-
-<h2>4 Service的生命周期</h2>
-
-<p>与Service生命周期相关的函数为onCreate和onDestroy两个函数，其规律如下。<br/>
-4.1 启动服务再绑定服务后，只能先解除绑定服务再停止服务才能真正停止掉服务。<br/>
-4.2 启动服务后，退出程序，服务不会停止；再次进入程序停止服务，服务才会停止。<br/>
-4.3 启动服务并绑定服务后，退出程序，也不会停止服务。需要解除绑定服务，并进行服务停止，才能真正停止服务。<br/>
-4.4 Service中onCreate函数只会在最开始时执行一次，之后反复执行启动服务，只会反复执行onStartCommand函数。</p>
-
-<h2>5 Service的停止与启动代码示例</h2>
-
-<h3>5.1 MyService（继承Service）</h3>
-
-<pre><code>package cn.loverobots.learnservice;
-
-import android.app.Service;
-import android.content.Intent;
-import android.os.Binder;
-import android.os.IBinder;
-
-public class MyService extends Service {
-    //控制服务运行的开关
-    private boolean serviceRunning = false;
-
-    public MyService() {
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        //返回一个实现了IBinder接口的对象
-        return new Binder();
-    }
-    //服务启动时所执行的命令示例
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        System.out.println("Service onStartCommand");
-        return super.onStartCommand(intent, flags, startId);
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        System.out.println("Service onCreate");
-        serviceRunning = true;
-        new Thread() {
-            @Override
-            public void run() {
-                super.run();
-                while (serviceRunning) {
-                    System.out.println("服务正在运行...");
-                    try {
-                        sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }.start();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        System.out.println("Service onDestory");
-        serviceRunning = false;
-        System.out.println("服务停止运行！");
-    }
-}
 </code></pre>
 ]]></content>
   </entry>

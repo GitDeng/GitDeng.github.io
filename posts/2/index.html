@@ -9,20 +9,13 @@
   <meta name="author" content="程序员笔记">
 
   
-  <meta name="description" content="1 创建一个类（MyAty.java） 1
+  <meta name="description" content="显示Intent 即采用指定类的方式。 1
 2
 3
 4
 5
 6
-7
-8
-9
-10
-11
-12
-package cn.loverobots.learnintent; import android.app.Activity;
-import android.os.Bundle; public class &hellip;">
+findViewById(R.id.btnStartMyAty).setOnClickListener(new View.OnClickListener() { @Override public void onClick(View v &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -79,6 +72,145 @@ import android.os.Bundle; public class &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/10/Display-and-implicit-Intent/">显示Intent与隐式Intent</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-07-10T02:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>2:39 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>显示Intent</h2>
+
+<p>即采用指定类的方式。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>findViewById(R.id.btnStartMyAty).setOnClickListener(new View.OnClickListener() {
+</span><span class='line'>    @Override
+</span><span class='line'>    public void onClick(View v) {
+</span><span class='line'>        startActivity(new Intent(MainActivity.this,MyAty.class));
+</span><span class='line'>    }
+</span><span class='line'>});</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>隐式Intent</h2>
+
+<p>即采用指定字符串调用的方式。</p>
+
+<h3>1 首先要在AndroidManifest.xml文件中指定对应字符串</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;!-- exported的值默认为true，其它应用程序是可以直接访问的，指定为false，反之 --&gt;
+</span><span class='line'>&lt;activity android:name=".MyAty" android:exported="false"&gt;
+</span><span class='line'>    &lt;intent-filter&gt;
+</span><span class='line'>        &lt;!-- 指定值为DEFAULT，则intent-filter的行为方式为Activity --&gt;
+</span><span class='line'>        &lt;category android:name="android.intent.category.DEFAULT"/&gt;
+</span><span class='line'>        &lt;!-- 指定启动字符串，其中约定成俗的字符串格式为：包名.intent.action.类名 --&gt;
+</span><span class='line'>        &lt;action android:name="cn.loverobots.learnintent.intent.action.MyAty"/&gt;
+</span><span class='line'>    &lt;/intent-filter&gt;
+</span><span class='line'>&lt;/activity&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2 为了避免反复输入冗长的字符串，一般在被调用类中创建一个静态常量保存字符串</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>public class MyAty extends Activity {
+</span><span class='line'>    //在类中创建静态常量ACTION，并赋值为启动字符串，方便其它Activity调用
+</span><span class='line'>    public static final String ACTION = "cn.loverobots.learnintent.intent.action.MyAty";
+</span><span class='line'>
+</span><span class='line'>    @Override
+</span><span class='line'>    protected void onCreate(Bundle savedInstanceState) {
+</span><span class='line'>        super.onCreate(savedInstanceState);
+</span><span class='line'>        setContentView(R.layout.myaty);//绑定myaty.xml视图文件
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>3 隐式Intent方式（程序LearnIntent中MainActivity.java调用）</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>findViewById(R.id.btnStartMyAty).setOnClickListener(new View.OnClickListener() {
+</span><span class='line'>    @Override
+</span><span class='line'>    public void onClick(View v) {
+</span><span class='line'>        //这种启动方法默认可以跨应用程序启动里面的Activity
+</span><span class='line'>        startActivity(new Intent(MyAty.ACTION));
+</span><span class='line'>    }
+</span><span class='line'>});</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>4 由于禁止跨程序调用（android:exported=&ldquo;false"），则需要在想要调用的程序中（另一个程序app1中MainActivity.java）捕获异常。</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>findViewById(R.id.btnStartMyAty).setOnClickListener(new View.OnClickListener() {
+</span><span class='line'>    @Override
+</span><span class='line'>    public void onClick(View v) {
+</span><span class='line'>        try {//由于不确定此字符串是否可调用，所以需要捕获异常
+</span><span class='line'>            startActivity(new Intent("cn.loverobots.learnintent.intent.action.MyAty"));
+</span><span class='line'>        }catch(Exception e){
+</span><span class='line'>            Toast.makeText(MainActivity.this,"无法启动指定的Activity",Toast.LENGTH_SHORT).show();
+</span><span class='line'>        }
+</span><span class='line'>    }
+</span><span class='line'>});</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1498,144 +1630,6 @@ import android.os.Bundle; public class &hellip;">
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/07/07/Android-profile/">认识Android</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2015-07-07T12:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>12:39 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>1 IT发展趋势</h2>
-
-<h3>1.1 IT发展趋势</h3>
-
-<p>1.1.1 第一代：代表机型：大型机，代表公司：IBM公司。<br/>
-1.1.2 第二代：代表机型：PC机，代表公司：苹果与微软公司。<br/>
-1.1.3 第三代：代表技术：互联网，代表公司：谷歌与百度公司。<br/>
-1.1.4 第四代：代表技术：移动互联网。代表公司：谷歌、苹果。</p>
-
-<h3>1.2 互联网用户的变化趋势</h3>
-
-<p>1.2.1 据工信部统计：2013年中国移动互联网用户达到7.5亿，3G用户数2.2亿。</p>
-
-<h2>2 无线通讯技术发展趋势</h2>
-
-<p>2.1 第一代无线通讯技术：1G（模拟）。<br/>
-2.2 第二代无线通讯技术：2G（数字）。TDMA,GSM,CDMA,GPRS,EDGE。<br/>
-2.3 第三代无线通讯技术：3G。WCDMA，TD-SCDMA。<br/>
-2.4 第四代无线通讯技术：4G。LTE（Long Term Evolution，长期演进技术）是3G的演进。</p>
-
-<h2>3 智能手机开发概述</h2>
-
-<h3>3.1 智能手机开发前景</h3>
-
-<p>3.1.1 掌握了移动终端就是拿到了未来成功的门票。<br/>
-3.1.2 北、上、广、深每天的Android开发工程师招聘人数庞大且薪资待遇普遍偏高。</p>
-
-<h3>3.2 智能手机操作系统</h3>
-
-<p>3.2.1 Symbian：诺基亚公司手机操作系统。<br/>
-3.2.2 BlackBerryOS（RIM）：黑莓手机操作系统。<br/>
-3.2.3 iOS：苹果手机操作系统。<br/>
-3.2.4 Android：目前是开源手机操作系统，由谷歌公司主导（市场占有率最高，且遥遥领先）<br/>
-3.2.5 Windows Phone：微软公司手机操作系统。</p>
-
-<h2>4 Android概述</h2>
-
-<h3>4.1 什么是Android</h3>
-
-<p>4.1.1 Android一词最早出现于法国作家利尔亚当（Auguste Villiers de l'Isle-Adam）在1886年发表的科幻小说《未来夏娃》（L'ève future）中。他将外表像人的机器起名为Android。</p>
-
-<h3>4.2 Android系统</h3>
-
-<p>4.2.1 Android是一种基于Linux的自由及开放源代码的操作系统，主要使用于移动设备，如智能手机和平板电脑，由Google公司和开放手机联盟领导及开发。<br/>
-4.2.2 Android平台由操作系统、中间件、用户界面和应用软件组成。<br/>
-4.2.3 Android主要用于移动设备。<br/>
-4.2.4 Android还提供了一个SDK用于开发Android应用程序。</p>
-
-<h3>4.3 Android发展史</h3>
-
-<p>4.3.1 2003年10月，Andy Rubin等人创建Android公司，并组建Android团队。<br/>
-4.3.2 2005年8月17日，Google低调收购了成立仅22个月的高科技企业Android及其团队。</p>
-
-<p>4.3.3 2007年11月5日，谷歌公司正式向外界展示了这款名为Android的操作系统，并且在这天谷歌宣布建立一个全球性的联盟组织，该组织由34家手机制造商、软件开发商、电信运营商以及芯片制造商共同组成，并与84家硬件制造商、软件开发商及电信营运商组成开放手持设备联盟（Open Handset Alliance）来共同研发改良Android系统，这一联盟将支持谷歌发布的手机操作系统以及应用软件，Google以Apache免费开源许可证的授权方式，发布了Android的源代码。</p>
-
-<p>4.3.4 2008年，在GoogleI/O大会上，谷歌提出了AndroidHAL架构图，在同年8月18号，Android获得了美国联邦通信委员会（FCC）的批准，在2008年9月，谷歌正式发布了Android 1.0系统，这也是Android系统最早的版本。</p>
-
-<p>4.3.5 2009年4月，谷歌正式推出了Android 1.5这款手机，从Android 1.5版本开始，谷歌开始将Android的版本以甜品的名字命名，Android 1.5命名为Cupcake（纸杯蛋糕）。该系统与Android 1.0相比有了很大的改进。</p>
-
-<p>4.3.6 2009年9月份，谷歌发布了Android 1.6的正式版，并且推出了搭载Android 1.6正式版的手机HTC Hero（G3），凭借着出色的外观设计以及全新的Android 1.6操作系统，HTC Hero（G3）成为当时全球最受欢迎的手机。Android 1.6也有一个有趣的甜品名称，它被称为Donut（甜甜圈）。</p>
-
-<p>4.3.7 2010年2月份，Linux内核开发者Greg Kroah-Hartman将Android的驱动程序从Linux内核“状态树”（“staging tree”）上除去，从此，Android与Linux开发主流将分道扬镳。在同年5月份，谷歌正式发布了Android 2.2操作系统。谷歌将Android 2.2操作系统命名为Froyo，翻译完名为冻酸奶。</p>
-
-<p>4.3.8 2010年10月份，谷歌宣布Android系统达到了第一个里程碑，即电子市场上获得官方数字认证的Android应用数量已经达到了10万个，Android系统的应用增长非常迅速。在2010年12月，谷歌正式发布了Android 2.3操作系统Gingerbread （姜饼）。</p>
-
-<p>4.3.9 2011年1月，谷歌称每日的Android设备新用户数量达到了30万部，到2011年7月，这个数字增长到55万部，而Android系统设备的用户总数达到了1.35亿，Android系统已经成为智能手机领域占有量最高的系统。</p>
-
-<p>4.3.10 2011年8月2日，Android手机已占据全球智能机市场48%的份额，并在亚太地区市场占据统治地位，终结了Symbian（塞班系统）的霸主地位，跃居全球第一。</p>
-
-<p>4.3.11 2011年9月份，Android系统的应用数目已经达到了48万，而在智能手机市场，Android系统的占有率已经达到了43%。继续在排在移动操作系统首位。谷歌将会发布全新的Android 4.0操作系统，这款系统被谷歌命名为Ice Cream Sandwich（冰激凌三明治）。</p>
-
-<p>4.3.12 2012年1月6日，谷歌Android Market已有10万开发者推出超过40万活跃的应用，大多数的应用程序为免费。Android Market应用程序商店目录在新年首周周末突破40万基准，距离突破30万应用仅4个月。在2011年早些时候，Android Market从20万增加到30万应用也花了四个月。</p>
-
-<p>4.3.13 2013年11月1日，Android4.4正式发布，从具体功能上讲，Android4.4提供了各种实用小功能，新的Android系统更智能，添加更多的Emoji表情图案，UI的改进也更现代，如全新的HelloiOS7半透明效果。</p>
-
-<p>4.3.14 2014年10月15日（美国太平洋时间）发布的全新Android 5.0操作系统。</p>
-
-<h3>4.4 Android的优势</h3>
-
-<p>4.4.1 Android系统开源，方便阅读底层源代码。<br/>
-4.4.2 Android开发，可以定制。<br/>
-4.4.3 Android应用层是排行榜名列前茅的Java语言。<br/>
-4.4.4 Android提供了真正的多任务功能。</p>
-
-<h2>5 Android系统架构</h2>
-
-<p>5.1 概述：Android系统采用分层架构。由内到外分别是：系统内核层、库集和安卓运行时、应用程序框架层、应用层。<br/>
-5.2 系统内核层：安全，存储器管理，程序管理，网络堆栈和各种驱动程序。<br/>
-5.3 库集和Android运行时：库集是用C++语言写的类库目的是为上层框架层提供如数据库管理、WebKit、媒体框架等功能。Android运行时包括核心类库，及Android虚拟机。其包含了Java JDK中绝大部分的核心API。<br/>
-5.4 应用程序框架层：将库集中C++语法封装为Java语法，目的是便于上一层应用层开发。框架层提供了包管理、Activity管理、电话管理、位置管理等。<br/>
-5.5 应用层：这是Android系统架构中最上层。在应用层中可以开发Android应用程序，应用层调用框架层的各种API进行Android应用开发。<br/>
-5.6 硬件抽象层：在系统内核（LINUX KERNEL）和库集（LIBRARIES）之间，还有一个硬件抽象层。这层的目的是设备及内核做修改时，可以减少对库集一层的影响和修改。并且提供为上一层对内核层调用的各种描述。</p>
-
-<h2>6 Android盈利模式</h2>
-
-<p>6.1 软硬结合：指手机操作系统与手机硬件相结合的销售（例如小米手机）。<br/>
-6.2 服务端/客户端结合：百度、新浪、腾讯等采取的盈利模式。通过自有Android开发团队，开发客户端，访问门户网站，扩大用户数，通过广告、在线购物等获利。<br/>
-6.3 内嵌广告：主要是个人和小团队开发的盈利模式。通过应用程序的下载量，提高广告展示收益。（如手电筒程序）<br/>
-6.4 应用内购买：软件提供基本的免费功能，高级功能收费。<br/>
-6.5 免费增值：通过提供80%的免费功能和20%增值功能，获取收益。（如印象笔记）<br/>
-6.6 外包型开发：通过接受Android应用程序开发任务获利（如印度外包开发）。</p>
-
-<h2>7 Android开发相关概念</h2>
-
-<p>7.1 SDK：即Standard Development Kits（标准开发工具包）的简称。<br/>
-7.2 API：即Application Program Interface（应用程序编程接口）的简称。这里主要指SDK中相关类的方法等。<br/>
-7.3 Virtual Machine：即Android虚拟机。<br/>
-7.4 apk：apk是Android应用的后缀，是AndroidPackage的缩写，即Android安装包（apk）。可以将apk后缀直接改为zip，用解压缩软件即可以直接查看Android安装包中的相关文件。通过安装apk，就可以使用此Android应用程序。<br/>
-7.5 dex：是Dalvik VM executes的简称，即Android Dalvik执行程序，类似于Windows中的exe文件。<br/>
-7.6 ADT：是Android Develop Kits的简称，即Android开发工具包。是Eclipse的一个插件程序。</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; 前一页</a>
@@ -1653,6 +1647,10 @@ import android.os.Bundle; public class &hellip;">
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/07/18/Cross-application-binding-Service/">跨应用启动Service</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/07/18/Cross-application-startup-Service/">跨应用启动Service</a>
       </li>
     
@@ -1666,10 +1664,6 @@ import android.os.Bundle; public class &hellip;">
     
       <li class="post">
         <a href="/blog/2015/07/13/Start-Service-and-transfer-data/">启动Service并传递数据</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/07/13/Service-Android/">认识Android Service</a>
       </li>
     
   </ul>

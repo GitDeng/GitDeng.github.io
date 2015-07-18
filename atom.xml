@@ -4,7 +4,7 @@
   <title><![CDATA[程序员笔记]]></title>
   <link href="http://gitdeng.github.io/atom.xml" rel="self"/>
   <link href="http://gitdeng.github.io/"/>
-  <updated>2015-07-18T16:10:39+08:00</updated>
+  <updated>2015-07-18T17:02:12+08:00</updated>
   <id>http://gitdeng.github.io/</id>
   <author>
     <name><![CDATA[程序员笔记]]></name>
@@ -12,6 +12,338 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[跨应用启动Service]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/18/Cross-application-binding-Service/"/>
+    <updated>2015-07-18T02:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/18/Cross-application-binding-Service</id>
+    <content type="html"><![CDATA[<h2>1 建立AIDL服务的步骤</h2>
+
+<p>建立AIDL服务要比建立普通的服务复杂一些，具体步骤如下：<br/>
+2.1 在Eclipse Android工程的Java包目录中建立一个扩展名为aidl的文件。该文件的语法类似于Java代码，但会稍有不同。<br/>
+2.2 如果aidl文件的内容是正确的，ADT会自动生成一个Java接口文件（*.java）。<br/>
+2.3 建立一个服务类（Service的子类）。<br/>
+2.4 实现由aidl文件生成的Java接口。<br/>
+2.5 在AndroidManifest.xml文件中配置AIDL服务，尤其要注意的是，<action>标签中android:name的属性值就是客户端要引用该服务的ID，也就是Intent类的参数值。</p>
+
+<h2>2 跨应用绑定Service</h2>
+
+<p>无法从其它的应用程序里面访问另一个应用程序里面的某一个类的定义，所以Android专门提供了一种机制，即AIDL——Android接口定义语言。</p>
+
+<h3>2.1 创建aidl文件(IAppServiceRemoteBinder.aidl)</h3>
+
+<p>模块名上右键创建AIDL File</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>// IAppServiceRemoteBinder.aidl
+</span><span class='line'>package cn.loverobots.startservicefromanotherapp;
+</span><span class='line'>
+</span><span class='line'>// Declare any non-default types here with import statements
+</span><span class='line'>//步骤1 创建aidl文件
+</span><span class='line'>interface IAppServiceRemoteBinder {
+</span><span class='line'>    /**
+</span><span class='line'>     * Demonstrates some basic types that you can use as parameters
+</span><span class='line'>     * and return values in AIDL.
+</span><span class='line'>     */
+</span><span class='line'>    void basicTypes(int anInt, long aLong, boolean aBoolean, float aFloat,
+</span><span class='line'>            double aDouble, String aString);
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2.2 当前模块下的AppService类实现aidl接口</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.startservicefromanotherapp;
+</span><span class='line'>
+</span><span class='line'>import android.app.Service;
+</span><span class='line'>import android.content.Intent;
+</span><span class='line'>import android.os.IBinder;
+</span><span class='line'>import android.os.RemoteException;
+</span><span class='line'>
+</span><span class='line'>public class AppService extends Service {
+</span><span class='line'>    public AppService() {
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    @Override
+</span><span class='line'>    public IBinder onBind(Intent intent) {
+</span><span class='line'>        //步骤2 实现aidl接口
+</span><span class='line'>        return new IAppServiceRemoteBinder.Stub() {
+</span><span class='line'>            @Override
+</span><span class='line'>            public void basicTypes(int anInt, long aLong, boolean aBoolean, float aFloat, double aDouble, String aString) throws RemoteException {
+</span><span class='line'>
+</span><span class='line'>            }
+</span><span class='line'>        };
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    @Override
+</span><span class='line'>    public void onCreate() {
+</span><span class='line'>        super.onCreate();
+</span><span class='line'>        System.out.println("Service Started");
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    @Override
+</span><span class='line'>    public void onDestroy() {
+</span><span class='line'>        super.onDestroy();
+</span><span class='line'>        System.out.println("Service Destroyed");
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2.3 在anotherapp中布局文件（activity_main.xml）添加绑定及解绑服务按钮</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+</span><span class='line'>    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+</span><span class='line'>    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+</span><span class='line'>    android:paddingRight="@dimen/activity_horizontal_margin"
+</span><span class='line'>    android:paddingTop="@dimen/activity_vertical_margin"
+</span><span class='line'>    android:paddingBottom="@dimen/activity_vertical_margin"
+</span><span class='line'>    android:orientation="vertical"
+</span><span class='line'>    tools:context=".MainActivity"&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;TextView
+</span><span class='line'>        android:text="跨应用启动服务测试"
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content" /&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;Button
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:text="启动外部服务"
+</span><span class='line'>        android:id="@+id/btnStartService" /&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;Button
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:text="停止外部服务"
+</span><span class='line'>        android:id="@+id/btnStopService" /&gt;
+</span><span class='line'>    &lt;!--步骤3 添加绑定及解绑服务按钮--&gt;
+</span><span class='line'>    &lt;Button
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:text="绑定外部服务"
+</span><span class='line'>        android:id="@+id/btnBindAppService" /&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;Button
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:text="解除绑定外部服务"
+</span><span class='line'>        android:id="@+id/btnUnbindAppService" /&gt;
+</span><span class='line'>&lt;/LinearLayout&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2.4 给按钮添加监听事件响应(anotherapp中的MainActivity.java)</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.anotherapp;
+</span><span class='line'>
+</span><span class='line'>import android.content.ComponentName;
+</span><span class='line'>import android.content.Context;
+</span><span class='line'>import android.content.Intent;
+</span><span class='line'>import android.content.ServiceConnection;
+</span><span class='line'>import android.os.IBinder;
+</span><span class='line'>import android.support.v7.app.ActionBarActivity;
+</span><span class='line'>import android.os.Bundle;
+</span><span class='line'>import android.view.View;
+</span><span class='line'>
+</span><span class='line'>public class MainActivity extends ActionBarActivity implements View.OnClickListener, ServiceConnection {
+</span><span class='line'>
+</span><span class='line'>    private Intent ServiceIntent;
+</span><span class='line'>
+</span><span class='line'>    @Override
+</span><span class='line'>    protected void onCreate(Bundle savedInstanceState) {
+</span><span class='line'>        super.onCreate(savedInstanceState);
+</span><span class='line'>        setContentView(R.layout.activity_main);
+</span><span class='line'>
+</span><span class='line'>        ServiceIntent = new Intent();
+</span><span class='line'>        //显式Intent方式启动Service
+</span><span class='line'>        ServiceIntent.setComponent(new ComponentName("cn.loverobots.startservicefromanotherapp","cn.loverobots.startservicefromanotherapp.AppService"));
+</span><span class='line'>
+</span><span class='line'>        findViewById(R.id.btnStartService).setOnClickListener(this);
+</span><span class='line'>        findViewById(R.id.btnStopService).setOnClickListener(this);
+</span><span class='line'>        //步骤4
+</span><span class='line'>        findViewById(R.id.btnBindAppService).setOnClickListener(this);
+</span><span class='line'>        findViewById(R.id.btnUnbindAppService).setOnClickListener(this);
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    @Override
+</span><span class='line'>    public void onClick(View v) {
+</span><span class='line'>        switch (v.getId()){
+</span><span class='line'>            case R.id.btnStartService:
+</span><span class='line'>                startService(ServiceIntent);
+</span><span class='line'>                break;
+</span><span class='line'>            case R.id.btnStopService:
+</span><span class='line'>                stopService(ServiceIntent);
+</span><span class='line'>                break;
+</span><span class='line'>            //步骤5
+</span><span class='line'>            case R.id.btnBindAppService:
+</span><span class='line'>                bindService(ServiceIntent,this, Context.BIND_AUTO_CREATE);
+</span><span class='line'>                break;
+</span><span class='line'>            case R.id.btnUnbindAppService:
+</span><span class='line'>                unbindService(this);
+</span><span class='line'>                break;
+</span><span class='line'>        }
+</span><span class='line'>    }
+</span><span class='line'>    //步骤6
+</span><span class='line'>    @Override
+</span><span class='line'>    public void onServiceConnected(ComponentName name, IBinder service) {
+</span><span class='line'>        System.out.println("Bind Service");
+</span><span class='line'>        System.out.println(service);
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    @Override
+</span><span class='line'>    public void onServiceDisconnected(ComponentName name) {
+</span><span class='line'>        System.out.println("Unbind Service");
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[跨应用启动Service]]></title>
@@ -25,16 +357,7 @@
 <p>Android系统中的进程之间不能共享内存，因此，需要提供一些机制在不同进程之间进行数据通信。为了使其他的应用程序也可以访问本应用程序提供的服务，Android系统采用了远程过程调用（Remote Procedure Call，RPC）方式来实现。与很多其他的基于RPC的解决方案一样，Android使用一种接口定义语言（Interface Definition Language，IDL）来公开服务的接口。<br/>
 我们知道4个Android应用程序组件中的3个（Activity、BroadcastReceiver和ContentProvider）都可以进行跨进程访问，另外一个Android应用程序组件Service同样可以。因此，可以将这种可以跨进程访问的服务称为AIDL（Android Interface Definition Language）服务。</p>
 
-<h3>2 建立AIDL服务的步骤</h3>
-
-<p>建立AIDL服务要比建立普通的服务复杂一些，具体步骤如下：<br/>
-2.1 在Eclipse Android工程的Java包目录中建立一个扩展名为aidl的文件。该文件的语法类似于Java代码，但会稍有不同。
-2.2 如果aidl文件的内容是正确的，ADT会自动生成一个Java接口文件（*.java）。
-2.3 建立一个服务类（Service的子类）。
-2.4 实现由aidl文件生成的Java接口。
-2.5 在AndroidManifest.xml文件中配置AIDL服务，尤其要注意的是，<action>标签中android:name的属性值就是客户端要引用该服务的ID，也就是Intent类的参数值。</p>
-
-<h3>3 跨应用启动Service</h3>
+<h3>2 跨应用启动Service</h3>
 
 <p>从Android 5.0开始，如果想启动服务，必须使用显式Intent，不能够使用隐式Intent。</p>
 
@@ -3971,124 +4294,6 @@
     <content type="html"><![CDATA[<h2>官方文档说明图</h2>
 
 <p><img src="http://www.loverobots.cn/wp-content/uploads/2015/07/activity_lifecycle-00.jpg" alt="Activity的生命周期" /></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[认识Android]]></title>
-    <link href="http://gitdeng.github.io/blog/2015/07/07/Android-profile/"/>
-    <updated>2015-07-07T12:39:20+08:00</updated>
-    <id>http://gitdeng.github.io/blog/2015/07/07/Android-profile</id>
-    <content type="html"><![CDATA[<h2>1 IT发展趋势</h2>
-
-<h3>1.1 IT发展趋势</h3>
-
-<p>1.1.1 第一代：代表机型：大型机，代表公司：IBM公司。<br/>
-1.1.2 第二代：代表机型：PC机，代表公司：苹果与微软公司。<br/>
-1.1.3 第三代：代表技术：互联网，代表公司：谷歌与百度公司。<br/>
-1.1.4 第四代：代表技术：移动互联网。代表公司：谷歌、苹果。</p>
-
-<h3>1.2 互联网用户的变化趋势</h3>
-
-<p>1.2.1 据工信部统计：2013年中国移动互联网用户达到7.5亿，3G用户数2.2亿。</p>
-
-<h2>2 无线通讯技术发展趋势</h2>
-
-<p>2.1 第一代无线通讯技术：1G（模拟）。<br/>
-2.2 第二代无线通讯技术：2G（数字）。TDMA,GSM,CDMA,GPRS,EDGE。<br/>
-2.3 第三代无线通讯技术：3G。WCDMA，TD-SCDMA。<br/>
-2.4 第四代无线通讯技术：4G。LTE（Long Term Evolution，长期演进技术）是3G的演进。</p>
-
-<h2>3 智能手机开发概述</h2>
-
-<h3>3.1 智能手机开发前景</h3>
-
-<p>3.1.1 掌握了移动终端就是拿到了未来成功的门票。<br/>
-3.1.2 北、上、广、深每天的Android开发工程师招聘人数庞大且薪资待遇普遍偏高。</p>
-
-<h3>3.2 智能手机操作系统</h3>
-
-<p>3.2.1 Symbian：诺基亚公司手机操作系统。<br/>
-3.2.2 BlackBerryOS（RIM）：黑莓手机操作系统。<br/>
-3.2.3 iOS：苹果手机操作系统。<br/>
-3.2.4 Android：目前是开源手机操作系统，由谷歌公司主导（市场占有率最高，且遥遥领先）<br/>
-3.2.5 Windows Phone：微软公司手机操作系统。</p>
-
-<h2>4 Android概述</h2>
-
-<h3>4.1 什么是Android</h3>
-
-<p>4.1.1 Android一词最早出现于法国作家利尔亚当（Auguste Villiers de l'Isle-Adam）在1886年发表的科幻小说《未来夏娃》（L'ève future）中。他将外表像人的机器起名为Android。</p>
-
-<h3>4.2 Android系统</h3>
-
-<p>4.2.1 Android是一种基于Linux的自由及开放源代码的操作系统，主要使用于移动设备，如智能手机和平板电脑，由Google公司和开放手机联盟领导及开发。<br/>
-4.2.2 Android平台由操作系统、中间件、用户界面和应用软件组成。<br/>
-4.2.3 Android主要用于移动设备。<br/>
-4.2.4 Android还提供了一个SDK用于开发Android应用程序。</p>
-
-<h3>4.3 Android发展史</h3>
-
-<p>4.3.1 2003年10月，Andy Rubin等人创建Android公司，并组建Android团队。<br/>
-4.3.2 2005年8月17日，Google低调收购了成立仅22个月的高科技企业Android及其团队。</p>
-
-<p>4.3.3 2007年11月5日，谷歌公司正式向外界展示了这款名为Android的操作系统，并且在这天谷歌宣布建立一个全球性的联盟组织，该组织由34家手机制造商、软件开发商、电信运营商以及芯片制造商共同组成，并与84家硬件制造商、软件开发商及电信营运商组成开放手持设备联盟（Open Handset Alliance）来共同研发改良Android系统，这一联盟将支持谷歌发布的手机操作系统以及应用软件，Google以Apache免费开源许可证的授权方式，发布了Android的源代码。</p>
-
-<p>4.3.4 2008年，在GoogleI/O大会上，谷歌提出了AndroidHAL架构图，在同年8月18号，Android获得了美国联邦通信委员会（FCC）的批准，在2008年9月，谷歌正式发布了Android 1.0系统，这也是Android系统最早的版本。</p>
-
-<p>4.3.5 2009年4月，谷歌正式推出了Android 1.5这款手机，从Android 1.5版本开始，谷歌开始将Android的版本以甜品的名字命名，Android 1.5命名为Cupcake（纸杯蛋糕）。该系统与Android 1.0相比有了很大的改进。</p>
-
-<p>4.3.6 2009年9月份，谷歌发布了Android 1.6的正式版，并且推出了搭载Android 1.6正式版的手机HTC Hero（G3），凭借着出色的外观设计以及全新的Android 1.6操作系统，HTC Hero（G3）成为当时全球最受欢迎的手机。Android 1.6也有一个有趣的甜品名称，它被称为Donut（甜甜圈）。</p>
-
-<p>4.3.7 2010年2月份，Linux内核开发者Greg Kroah-Hartman将Android的驱动程序从Linux内核“状态树”（“staging tree”）上除去，从此，Android与Linux开发主流将分道扬镳。在同年5月份，谷歌正式发布了Android 2.2操作系统。谷歌将Android 2.2操作系统命名为Froyo，翻译完名为冻酸奶。</p>
-
-<p>4.3.8 2010年10月份，谷歌宣布Android系统达到了第一个里程碑，即电子市场上获得官方数字认证的Android应用数量已经达到了10万个，Android系统的应用增长非常迅速。在2010年12月，谷歌正式发布了Android 2.3操作系统Gingerbread （姜饼）。</p>
-
-<p>4.3.9 2011年1月，谷歌称每日的Android设备新用户数量达到了30万部，到2011年7月，这个数字增长到55万部，而Android系统设备的用户总数达到了1.35亿，Android系统已经成为智能手机领域占有量最高的系统。</p>
-
-<p>4.3.10 2011年8月2日，Android手机已占据全球智能机市场48%的份额，并在亚太地区市场占据统治地位，终结了Symbian（塞班系统）的霸主地位，跃居全球第一。</p>
-
-<p>4.3.11 2011年9月份，Android系统的应用数目已经达到了48万，而在智能手机市场，Android系统的占有率已经达到了43%。继续在排在移动操作系统首位。谷歌将会发布全新的Android 4.0操作系统，这款系统被谷歌命名为Ice Cream Sandwich（冰激凌三明治）。</p>
-
-<p>4.3.12 2012年1月6日，谷歌Android Market已有10万开发者推出超过40万活跃的应用，大多数的应用程序为免费。Android Market应用程序商店目录在新年首周周末突破40万基准，距离突破30万应用仅4个月。在2011年早些时候，Android Market从20万增加到30万应用也花了四个月。</p>
-
-<p>4.3.13 2013年11月1日，Android4.4正式发布，从具体功能上讲，Android4.4提供了各种实用小功能，新的Android系统更智能，添加更多的Emoji表情图案，UI的改进也更现代，如全新的HelloiOS7半透明效果。</p>
-
-<p>4.3.14 2014年10月15日（美国太平洋时间）发布的全新Android 5.0操作系统。</p>
-
-<h3>4.4 Android的优势</h3>
-
-<p>4.4.1 Android系统开源，方便阅读底层源代码。<br/>
-4.4.2 Android开发，可以定制。<br/>
-4.4.3 Android应用层是排行榜名列前茅的Java语言。<br/>
-4.4.4 Android提供了真正的多任务功能。</p>
-
-<h2>5 Android系统架构</h2>
-
-<p>5.1 概述：Android系统采用分层架构。由内到外分别是：系统内核层、库集和安卓运行时、应用程序框架层、应用层。<br/>
-5.2 系统内核层：安全，存储器管理，程序管理，网络堆栈和各种驱动程序。<br/>
-5.3 库集和Android运行时：库集是用C++语言写的类库目的是为上层框架层提供如数据库管理、WebKit、媒体框架等功能。Android运行时包括核心类库，及Android虚拟机。其包含了Java JDK中绝大部分的核心API。<br/>
-5.4 应用程序框架层：将库集中C++语法封装为Java语法，目的是便于上一层应用层开发。框架层提供了包管理、Activity管理、电话管理、位置管理等。<br/>
-5.5 应用层：这是Android系统架构中最上层。在应用层中可以开发Android应用程序，应用层调用框架层的各种API进行Android应用开发。<br/>
-5.6 硬件抽象层：在系统内核（LINUX KERNEL）和库集（LIBRARIES）之间，还有一个硬件抽象层。这层的目的是设备及内核做修改时，可以减少对库集一层的影响和修改。并且提供为上一层对内核层调用的各种描述。</p>
-
-<h2>6 Android盈利模式</h2>
-
-<p>6.1 软硬结合：指手机操作系统与手机硬件相结合的销售（例如小米手机）。<br/>
-6.2 服务端/客户端结合：百度、新浪、腾讯等采取的盈利模式。通过自有Android开发团队，开发客户端，访问门户网站，扩大用户数，通过广告、在线购物等获利。<br/>
-6.3 内嵌广告：主要是个人和小团队开发的盈利模式。通过应用程序的下载量，提高广告展示收益。（如手电筒程序）<br/>
-6.4 应用内购买：软件提供基本的免费功能，高级功能收费。<br/>
-6.5 免费增值：通过提供80%的免费功能和20%增值功能，获取收益。（如印象笔记）<br/>
-6.6 外包型开发：通过接受Android应用程序开发任务获利（如印度外包开发）。</p>
-
-<h2>7 Android开发相关概念</h2>
-
-<p>7.1 SDK：即Standard Development Kits（标准开发工具包）的简称。<br/>
-7.2 API：即Application Program Interface（应用程序编程接口）的简称。这里主要指SDK中相关类的方法等。<br/>
-7.3 Virtual Machine：即Android虚拟机。<br/>
-7.4 apk：apk是Android应用的后缀，是AndroidPackage的缩写，即Android安装包（apk）。可以将apk后缀直接改为zip，用解压缩软件即可以直接查看Android安装包中的相关文件。通过安装apk，就可以使用此Android应用程序。<br/>
-7.5 dex：是Dalvik VM executes的简称，即Android Dalvik执行程序，类似于Windows中的exe文件。<br/>
-7.6 ADT：是Android Develop Kits的简称，即Android开发工具包。是Eclipse的一个插件程序。</p>
 ]]></content>
   </entry>
   
