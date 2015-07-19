@@ -4,7 +4,7 @@
   <title><![CDATA[程序员笔记]]></title>
   <link href="http://gitdeng.github.io/atom.xml" rel="self"/>
   <link href="http://gitdeng.github.io/"/>
-  <updated>2015-07-19T01:15:02+08:00</updated>
+  <updated>2015-07-19T23:56:04+08:00</updated>
   <id>http://gitdeng.github.io/</id>
   <author>
     <name><![CDATA[程序员笔记]]></name>
@@ -12,6 +12,373 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[BroadcastReceiver的优先级]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/20/BroadcastReceiver-priority/"/>
+    <updated>2015-07-20T00:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/20/BroadcastReceiver-priority</id>
+    <content type="html"><![CDATA[<h2>使用简介</h2>
+
+<p>在AndroidManifest.xml文件中注册receiver时，可在过滤器中增加优先级设置(priority)，数字越大优先级越高，越早执行。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;intent-filter android:priority="7"&gt;
+</span><span class='line'>                &lt;action android:name="cn.loverobots.learnbroadcastreceiver.intent.action.MyReceiver"/&gt;
+</span><span class='line'>&lt;/intent-filter&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>注意事项</h2>
+
+<p>采用abordBroadcast();方法进行广播中断时，不能采用sendBroadcast(new Intent);方式进行广播发送，会报错（BroadcastReceiver trying to return result during a non-ordered broadcast），且不会有中断广播效果。应该采用sendOrderedBroadcast(i,null);方式发送广播。</p>
+
+<h2>代码举例</h2>
+
+<h3>1 AndroidManifest.xml</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+</span><span class='line'>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+</span><span class='line'>    package="cn.loverobots.learnbroadcastreceiver" &gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;application
+</span><span class='line'>        android:allowBackup="true"
+</span><span class='line'>        android:icon="@mipmap/ic_launcher"
+</span><span class='line'>        android:label="@string/app_name"
+</span><span class='line'>        android:theme="@style/AppTheme" &gt;
+</span><span class='line'>        &lt;activity
+</span><span class='line'>            android:name=".MainActivity"
+</span><span class='line'>            android:label="@string/app_name" &gt;
+</span><span class='line'>            &lt;intent-filter&gt;
+</span><span class='line'>                &lt;action android:name="android.intent.action.MAIN" /&gt;
+</span><span class='line'>
+</span><span class='line'>                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+</span><span class='line'>            &lt;/intent-filter&gt;
+</span><span class='line'>        &lt;/activity&gt;
+</span><span class='line'>
+</span><span class='line'>        &lt;receiver
+</span><span class='line'>            android:name=".MyReceiver2"
+</span><span class='line'>            android:enabled="true"
+</span><span class='line'>            android:exported="true"&gt;
+</span><span class='line'>            &lt;intent-filter android:priority="7"&gt;
+</span><span class='line'>                &lt;action android:name="cn.loverobots.learnbroadcastreceiver.intent.action.MyReceiver"/&gt;
+</span><span class='line'>            &lt;/intent-filter&gt;
+</span><span class='line'>        &lt;/receiver&gt;
+</span><span class='line'>        &lt;receiver
+</span><span class='line'>            android:name=".MyReceiver"
+</span><span class='line'>            android:enabled="true"
+</span><span class='line'>            android:exported="true"&gt;
+</span><span class='line'>            &lt;intent-filter android:priority="8"&gt;
+</span><span class='line'>                &lt;action android:name="cn.loverobots.learnbroadcastreceiver.intent.action.MyReceiver"/&gt;
+</span><span class='line'>            &lt;/intent-filter&gt;
+</span><span class='line'>        &lt;/receiver&gt;
+</span><span class='line'>    &lt;/application&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;/manifest&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2 MainActivity.java</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.learnbroadcastreceiver;
+</span><span class='line'>
+</span><span class='line'>import android.content.Intent;
+</span><span class='line'>import android.content.IntentFilter;
+</span><span class='line'>import android.support.v7.app.ActionBarActivity;
+</span><span class='line'>import android.os.Bundle;
+</span><span class='line'>import android.view.View;
+</span><span class='line'>
+</span><span class='line'>public class MainActivity extends ActionBarActivity implements View.OnClickListener {
+</span><span class='line'>
+</span><span class='line'>    private MyReceiver receiver = null;
+</span><span class='line'>
+</span><span class='line'>    @Override
+</span><span class='line'>    protected void onCreate(Bundle savedInstanceState) {
+</span><span class='line'>        super.onCreate(savedInstanceState);
+</span><span class='line'>        setContentView(R.layout.activity_main);
+</span><span class='line'>
+</span><span class='line'>        findViewById(R.id.btnSendMsg).setOnClickListener(this);
+</span><span class='line'>        findViewById(R.id.btnReg).setOnClickListener(this);
+</span><span class='line'>        findViewById(R.id.btnUnreg).setOnClickListener(this);
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    @Override
+</span><span class='line'>    public void onClick(View v) {
+</span><span class='line'>        switch(v.getId()){
+</span><span class='line'>            case R.id.btnSendMsg:
+</span><span class='line'>//                Intent i = new Intent(this,MyReceiver.class);
+</span><span class='line'>                //这时只能隐式Intent传递数据了
+</span><span class='line'>                Intent i = new Intent(MyReceiver.ACTION);
+</span><span class='line'>                i.putExtra("data","JACK的机器人");
+</span><span class='line'>//                sendBroadcast(i);//采用abortBroadcast();中断广播后，不能再采用此方式会报错，不能被中断
+</span><span class='line'>                //报错BroadcastReceiver trying to return result during a non-ordered broadcast后，采用方式
+</span><span class='line'>                sendOrderedBroadcast(i,null);
+</span><span class='line'>                break;
+</span><span class='line'>            case R.id.btnReg:
+</span><span class='line'>                //为避免重复注册操作，加入判断条件
+</span><span class='line'>                if(receiver == null){
+</span><span class='line'>                    //初始化receiver
+</span><span class='line'>                    receiver = new MyReceiver();
+</span><span class='line'>                    registerReceiver(receiver,new IntentFilter(MyReceiver.ACTION));
+</span><span class='line'>                    System.out.println("注册了接收器");
+</span><span class='line'>                }
+</span><span class='line'>                break;
+</span><span class='line'>            case R.id.btnUnreg:
+</span><span class='line'>                if(receiver != null){
+</span><span class='line'>                    unregisterReceiver(receiver);
+</span><span class='line'>                    receiver = null;
+</span><span class='line'>                    System.out.println("注消了接收器");
+</span><span class='line'>                }
+</span><span class='line'>                break;
+</span><span class='line'>        }
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>3 MyReceiver.java(继承BroadcastReceiver)</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.learnbroadcastreceiver;
+</span><span class='line'>
+</span><span class='line'>import android.content.BroadcastReceiver;
+</span><span class='line'>import android.content.Context;
+</span><span class='line'>import android.content.Intent;
+</span><span class='line'>
+</span><span class='line'>public class MyReceiver extends BroadcastReceiver {
+</span><span class='line'>
+</span><span class='line'>    public static final String ACTION = "cn.loverobots.learnbroadcastreceiver.intent.action.MyReceiver";
+</span><span class='line'>
+</span><span class='line'>    public MyReceiver() {
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    @Override
+</span><span class='line'>    public void onReceive(Context context, Intent intent) {
+</span><span class='line'>//        System.out.println("接收到了消息，消息的内容是："+intent.getStringExtra("data"));
+</span><span class='line'>        System.out.println("MyReceiver 接收到了消息");
+</span><span class='line'>        //中断广播可以让优先级比其低的receiver不再接收到消息
+</span><span class='line'>        abortBroadcast();
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>4 MyReceiver2.java(继承BroadcastReceiver)</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.learnbroadcastreceiver;
+</span><span class='line'>
+</span><span class='line'>import android.content.BroadcastReceiver;
+</span><span class='line'>import android.content.Context;
+</span><span class='line'>import android.content.Intent;
+</span><span class='line'>
+</span><span class='line'>public class MyReceiver2 extends BroadcastReceiver {
+</span><span class='line'>    
+</span><span class='line'>    public MyReceiver2() {
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    @Override
+</span><span class='line'>    public void onReceive(Context context, Intent intent) {
+</span><span class='line'>        System.out.println("MyReceiver2 接收到了消息");
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>5 activity_main.xml</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+</span><span class='line'>    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+</span><span class='line'>    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+</span><span class='line'>    android:paddingRight="@dimen/activity_horizontal_margin"
+</span><span class='line'>    android:paddingTop="@dimen/activity_vertical_margin"
+</span><span class='line'>    android:paddingBottom="@dimen/activity_vertical_margin"
+</span><span class='line'>    android:orientation="vertical"
+</span><span class='line'>    tools:context=".MainActivity"&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;TextView
+</span><span class='line'>        android:text="@string/hello_world"
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content" /&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;Button
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:text="发送消息"
+</span><span class='line'>        android:id="@+id/btnSendMsg" /&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;Button
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:text="注册接收器"
+</span><span class='line'>        android:id="@+id/btnReg" /&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;Button
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:text="注销接收器"
+</span><span class='line'>        android:id="@+id/btnUnreg" /&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;/LinearLayout&gt;</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[动态注册和注销BroadcastReceiver]]></title>
@@ -4787,117 +5154,6 @@
 </span><span class='line'>    tv = (TextView) findViewById(R.id.tv);
 </span><span class='line'>    Intent i = getIntent();
 </span><span class='line'>    User user = i.getParcelableExtra("user");//以Parcelable的方式获取值对象
-</span><span class='line'>    tv.setText(String.format("User info(name=%s , age=%d)",user.getName(),user.getAge()));
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Activity之间的值传递（实现Serializable）]]></title>
-    <link href="http://gitdeng.github.io/blog/2015/07/08/Value-transfer-between-Activity-Serializable/"/>
-    <updated>2015-07-08T13:39:20+08:00</updated>
-    <id>http://gitdeng.github.io/blog/2015/07/08/Value-transfer-between-Activity-Serializable</id>
-    <content type="html"><![CDATA[<h2>1 值对象</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.sendargs;
-</span><span class='line'>import java.io.Serializable;
-</span><span class='line'>public class User implements Serializable{
-</span><span class='line'>    private String name;
-</span><span class='line'>    private int age;
-</span><span class='line'>    public void setName(String name) {
-</span><span class='line'>        this.name = name;
-</span><span class='line'>    }
-</span><span class='line'>    public void setAge(int age) {
-</span><span class='line'>        this.age = age;
-</span><span class='line'>    }
-</span><span class='line'>    public String getName() {
-</span><span class='line'>        return name;
-</span><span class='line'>    }
-</span><span class='line'>    public int getAge() {
-</span><span class='line'>        return age;
-</span><span class='line'>    }
-</span><span class='line'>    public User (String name,int age){
-</span><span class='line'>        this.name = name;
-</span><span class='line'>        this.age = age;
-</span><span class='line'>    }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>2 MainActivity</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>@Override
-</span><span class='line'>protected void onCreate(Bundle savedInstanceState) {
-</span><span class='line'>    super.onCreate(savedInstanceState);
-</span><span class='line'>    setContentView(R.layout.activity_main);
-</span><span class='line'>
-</span><span class='line'>    findViewById(R.id.btnStartAty).setOnClickListener(new View.OnClickListener() {
-</span><span class='line'>        @Override
-</span><span class='line'>        public void onClick(View v) {
-</span><span class='line'>            Intent i = new Intent(MainActivity.this,TheAty.class);
-</span><span class='line'>            i.putExtra("user",new User("jackrobot",20));//传递值对象，同时对值对象进行初始化
-</span><span class='line'>            startActivity(i);
-</span><span class='line'>        }
-</span><span class='line'>    });
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>3 TheAty</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>private TextView tv;
-</span><span class='line'>@Override
-</span><span class='line'>protected void onCreate(Bundle savedInstanceState) {
-</span><span class='line'>    super.onCreate(savedInstanceState);
-</span><span class='line'>    setContentView(R.layout.activity_the_aty);
-</span><span class='line'>    tv = (TextView) findViewById(R.id.tv);
-</span><span class='line'>    Intent i = getIntent();
-</span><span class='line'>    User user = (User) i.getSerializableExtra("user");//以Serializable的方式获取值对象
 </span><span class='line'>    tv.setText(String.format("User info(name=%s , age=%d)",user.getName(),user.getAge()));
 </span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
 

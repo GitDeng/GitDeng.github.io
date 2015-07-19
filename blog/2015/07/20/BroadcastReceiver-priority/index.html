@@ -5,11 +5,14 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>动态注册和注销BroadcastReceiver - 程序员笔记</title>
+  <title>BroadcastReceiver的优先级 - 程序员笔记</title>
   <meta name="author" content="程序员笔记">
 
   
-  <meta name="description" content="BroadcastReceiver简介 BroadcastReceiver 是Android 四大基本组件之一，用于接收广播信息，如：开屏、锁屏、短信等等，在实际工作中用途非常广泛。 动态注册和注销BroadcastReceiver 有的情况下， &hellip;">
+  <meta name="description" content="使用简介 在AndroidManifest.xml文件中注册receiver时，可在过滤器中增加优先级设置(priority)，数字越大优先级越高，越早执行。 1
+2
+3
+&lt;intent-filter android:priority="7"&gt; &lt;action android: &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +21,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://gitdeng.github.io/blog/2015/07/19/Dynamic%20registration%20and%20cancellation%20BroadcastReceiver/">
+  <link rel="canonical" href="http://gitdeng.github.io/blog/2015/07/20/BroadcastReceiver-priority/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="程序员笔记" type="application/atom+xml">
@@ -69,7 +72,7 @@
   
   <header>
     
-      <h1 class="entry-title">动态注册和注销BroadcastReceiver</h1>
+      <h1 class="entry-title">BroadcastReceiver的优先级</h1>
     
     
       <p class="meta">
@@ -78,22 +81,112 @@
 
 
 
-<time class='entry-date' datetime='2015-07-19T01:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>19</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>1:39 am</span></time>
+<time class='entry-date' datetime='2015-07-20T00:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>12:39 am</span></time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><h2>BroadcastReceiver简介</h2>
+<div class="entry-content"><h2>使用简介</h2>
 
-<p>BroadcastReceiver 是Android 四大基本组件之一，用于接收广播信息，如：开屏、锁屏、短信等等，在实际工作中用途非常广泛。</p>
+<p>在AndroidManifest.xml文件中注册receiver时，可在过滤器中增加优先级设置(priority)，数字越大优先级越高，越早执行。</p>
 
-<h2>动态注册和注销BroadcastReceiver</h2>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;intent-filter android:priority="7"&gt;
+</span><span class='line'>                &lt;action android:name="cn.loverobots.learnbroadcastreceiver.intent.action.MyReceiver"/&gt;
+</span><span class='line'>&lt;/intent-filter&gt;</span></code></pre></td></tr></table></div></figure>
 
-<p>有的情况下，我们不希望BroadcastReceiver始终处于侦听状态，这时就需要会注册和注销BroadcastReceiver。</p>
 
-<h3>1 MainActivity.java</h3>
+<h2>注意事项</h2>
+
+<p>采用abordBroadcast();方法进行广播中断时，不能采用sendBroadcast(new Intent);方式进行广播发送，会报错（BroadcastReceiver trying to return result during a non-ordered broadcast），且不会有中断广播效果。应该采用sendOrderedBroadcast(i,null);方式发送广播。</p>
+
+<h2>代码举例</h2>
+
+<h3>1 AndroidManifest.xml</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+</span><span class='line'>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+</span><span class='line'>    package="cn.loverobots.learnbroadcastreceiver" &gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;application
+</span><span class='line'>        android:allowBackup="true"
+</span><span class='line'>        android:icon="@mipmap/ic_launcher"
+</span><span class='line'>        android:label="@string/app_name"
+</span><span class='line'>        android:theme="@style/AppTheme" &gt;
+</span><span class='line'>        &lt;activity
+</span><span class='line'>            android:name=".MainActivity"
+</span><span class='line'>            android:label="@string/app_name" &gt;
+</span><span class='line'>            &lt;intent-filter&gt;
+</span><span class='line'>                &lt;action android:name="android.intent.action.MAIN" /&gt;
+</span><span class='line'>
+</span><span class='line'>                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+</span><span class='line'>            &lt;/intent-filter&gt;
+</span><span class='line'>        &lt;/activity&gt;
+</span><span class='line'>
+</span><span class='line'>        &lt;receiver
+</span><span class='line'>            android:name=".MyReceiver2"
+</span><span class='line'>            android:enabled="true"
+</span><span class='line'>            android:exported="true"&gt;
+</span><span class='line'>            &lt;intent-filter android:priority="7"&gt;
+</span><span class='line'>                &lt;action android:name="cn.loverobots.learnbroadcastreceiver.intent.action.MyReceiver"/&gt;
+</span><span class='line'>            &lt;/intent-filter&gt;
+</span><span class='line'>        &lt;/receiver&gt;
+</span><span class='line'>        &lt;receiver
+</span><span class='line'>            android:name=".MyReceiver"
+</span><span class='line'>            android:enabled="true"
+</span><span class='line'>            android:exported="true"&gt;
+</span><span class='line'>            &lt;intent-filter android:priority="8"&gt;
+</span><span class='line'>                &lt;action android:name="cn.loverobots.learnbroadcastreceiver.intent.action.MyReceiver"/&gt;
+</span><span class='line'>            &lt;/intent-filter&gt;
+</span><span class='line'>        &lt;/receiver&gt;
+</span><span class='line'>    &lt;/application&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;/manifest&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2 MainActivity.java</h3>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -146,6 +239,8 @@
 <span class='line-number'>49</span>
 <span class='line-number'>50</span>
 <span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.learnbroadcastreceiver;
 </span><span class='line'>
 </span><span class='line'>import android.content.Intent;
@@ -176,7 +271,9 @@
 </span><span class='line'>                //这时只能隐式Intent传递数据了
 </span><span class='line'>                Intent i = new Intent(MyReceiver.ACTION);
 </span><span class='line'>                i.putExtra("data","JACK的机器人");
-</span><span class='line'>                sendBroadcast(i);
+</span><span class='line'>//                sendBroadcast(i);//采用abortBroadcast();中断广播后，不能再采用此方式会报错，不能被中断
+</span><span class='line'>                //报错BroadcastReceiver trying to return result during a non-ordered broadcast后，采用方式
+</span><span class='line'>                sendOrderedBroadcast(i,null);
 </span><span class='line'>                break;
 </span><span class='line'>            case R.id.btnReg:
 </span><span class='line'>                //为避免重复注册操作，加入判断条件
@@ -199,7 +296,7 @@
 </span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
 
 
-<h3>2 MyReceiver.java</h3>
+<h3>3 MyReceiver.java(继承BroadcastReceiver)</h3>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -219,6 +316,9 @@
 <span class='line-number'>16</span>
 <span class='line-number'>17</span>
 <span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.learnbroadcastreceiver;
 </span><span class='line'>
 </span><span class='line'>import android.content.BroadcastReceiver;
@@ -234,12 +334,51 @@
 </span><span class='line'>
 </span><span class='line'>    @Override
 </span><span class='line'>    public void onReceive(Context context, Intent intent) {
-</span><span class='line'>        System.out.println("接收到了消息，消息的内容是："+intent.getStringExtra("data"));
+</span><span class='line'>//        System.out.println("接收到了消息，消息的内容是："+intent.getStringExtra("data"));
+</span><span class='line'>        System.out.println("MyReceiver 接收到了消息");
+</span><span class='line'>        //中断广播可以让优先级比其低的receiver不再接收到消息
+</span><span class='line'>        abortBroadcast();
 </span><span class='line'>    }
 </span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
 
 
-<h3>3 activity_main.xml</h3>
+<h3>4 MyReceiver2.java(继承BroadcastReceiver)</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.learnbroadcastreceiver;
+</span><span class='line'>
+</span><span class='line'>import android.content.BroadcastReceiver;
+</span><span class='line'>import android.content.Context;
+</span><span class='line'>import android.content.Intent;
+</span><span class='line'>
+</span><span class='line'>public class MyReceiver2 extends BroadcastReceiver {
+</span><span class='line'>    
+</span><span class='line'>    public MyReceiver2() {
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    @Override
+</span><span class='line'>    public void onReceive(Context context, Intent intent) {
+</span><span class='line'>        System.out.println("MyReceiver2 接收到了消息");
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>5 activity_main.xml</h3>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -308,54 +447,6 @@
 </span><span class='line'>
 </span><span class='line'>&lt;/LinearLayout&gt;</span></code></pre></td></tr></table></div></figure>
 
-
-<h3>4 AndroidMainfest.xml</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-</span><span class='line'>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
-</span><span class='line'>    package="cn.loverobots.learnbroadcastreceiver" &gt;
-</span><span class='line'>
-</span><span class='line'>    &lt;application
-</span><span class='line'>        android:allowBackup="true"
-</span><span class='line'>        android:icon="@mipmap/ic_launcher"
-</span><span class='line'>        android:label="@string/app_name"
-</span><span class='line'>        android:theme="@style/AppTheme" &gt;
-</span><span class='line'>        &lt;activity
-</span><span class='line'>            android:name=".MainActivity"
-</span><span class='line'>            android:label="@string/app_name" &gt;
-</span><span class='line'>            &lt;intent-filter&gt;
-</span><span class='line'>                &lt;action android:name="android.intent.action.MAIN" /&gt;
-</span><span class='line'>
-</span><span class='line'>                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
-</span><span class='line'>            &lt;/intent-filter&gt;
-</span><span class='line'>        &lt;/activity&gt;
-</span><span class='line'>
-</span><span class='line'>    &lt;/application&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;/manifest&gt;</span></code></pre></td></tr></table></div></figure>
-
 </div>
 
 
@@ -371,12 +462,12 @@
 
 
 
-<time class='entry-date' datetime='2015-07-19T01:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>19</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>1:39 am</span></time>
+<time class='entry-date' datetime='2015-07-20T00:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>12:39 am</span></time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/android/'>android</a>, <a class='category' href='/blog/categories/android-basic/'>android_basic</a>, <a class='category' href='/blog/categories/broadcastreceiver/'>broadcastreceiver</a>
+    <a class='category' href='/blog/categories/android/'>android</a>, <a class='category' href='/blog/categories/android-basic/'>android_basic</a>, <a class='category' href='/blog/categories/broadcastreceiver/'>broadcastreceiver</a>, <a class='category' href='/blog/categories/you-xian-ji/'>优先级</a>
   
 </span>
 
@@ -392,10 +483,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2015/07/18/Cross-application-binding-Service-and-communication/" title="Previous Post: 跨应用绑定Servic并通信">&laquo; 跨应用绑定Servic并通信</a>
+        <a class="basic-alignment left" href="/blog/2015/07/19/Dynamic%20registration%20and%20cancellation%20BroadcastReceiver/" title="Previous Post: 动态注册和注销BroadcastReceiver">&laquo; 动态注册和注销BroadcastReceiver</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2015/07/20/BroadcastReceiver-priority/" title="Next Post: BroadcastReceiver的优先级">BroadcastReceiver的优先级 &raquo;</a>
       
     </p>
   </footer>

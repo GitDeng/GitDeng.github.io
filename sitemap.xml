@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>http://gitdeng.github.io/blog/2015/07/20/BroadcastReceiver-priority/</loc>
+    <lastmod>2015-07-20T00:39:20+08:00</lastmod>
+  </url>
+  <url>
     <loc>http://gitdeng.github.io/blog/2015/07/19/Dynamic%20registration%20and%20cancellation%20BroadcastReceiver/</loc>
     <lastmod>2015-07-19T01:39:20+08:00</lastmod>
   </url>
@@ -223,6 +227,12 @@
   </url>
   <url>
     <loc>http://gitdeng.github.io/blog/categories/aidl/</loc>
+  </url>
+  <url>
+    <loc>http://gitdeng.github.io/blog/categories/broadcastreceiver/</loc>
+  </url>
+  <url>
+    <loc>http://gitdeng.github.io/blog/categories/you-xian-ji/</loc>
   </url>
   <url>
     <loc>http://gitdeng.github.io/posts/2/</loc>
