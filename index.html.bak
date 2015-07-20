@@ -9,7 +9,7 @@
   <meta name="author" content="程序员笔记">
 
   
-  <meta name="description" content=" Blog Archives Recent Posts Android日志系统 BroadcastReceiver的优先级 动态注册和注销BroadcastReceiver 跨应用绑定Servic并通信 跨应用绑定Service ">
+  <meta name="description" content=" Blog Archives Recent Posts Android的权限系统——为基本组件添加权限检查 Android的权限系统——为代码添加权限检查 Android的权限系统——请求权限实例 Android日志系统 BroadcastReceiver的优先级 ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,23 +80,23 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/07/20/Android-authority-system-Add-permissions-for-basic-components/">Android的权限系统——为基本组件添加权限检查</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/07/20/Android-authority-system-Add-permissions-for-code-check/">Android的权限系统——为代码添加权限检查</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/07/20/Android-authority-system-Request-permission-instance/">Android的权限系统——请求权限实例</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/07/20/Android-log-system/">Android日志系统</a>
       </li>
     
       <li class="post">
         <a href="/blog/2015/07/20/BroadcastReceiver-priority/">BroadcastReceiver的优先级</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/07/19/Dynamic%20registration%20and%20cancellation%20BroadcastReceiver/">动态注册和注销BroadcastReceiver</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/07/18/Cross-application-binding-Service-and-communication/">跨应用绑定Servic并通信</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/07/18/Cross-application-binding-Service/">跨应用绑定Service</a>
       </li>
     
   </ul>

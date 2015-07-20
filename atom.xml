@@ -4,7 +4,7 @@
   <title><![CDATA[程序员笔记]]></title>
   <link href="http://gitdeng.github.io/atom.xml" rel="self"/>
   <link href="http://gitdeng.github.io/"/>
-  <updated>2015-07-20T19:42:43+08:00</updated>
+  <updated>2015-07-20T23:08:02+08:00</updated>
   <id>http://gitdeng.github.io/</id>
   <author>
     <name><![CDATA[程序员笔记]]></name>
@@ -12,6 +12,584 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Android的权限系统——为基本组件添加权限检查]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/20/Android-authority-system-Add-permissions-for-basic-components/"/>
+    <updated>2015-07-20T18:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/20/Android-authority-system-Add-permissions-for-basic-components</id>
+    <content type="html"><![CDATA[<h2>app模块中</h2>
+
+<h3>1 MainActivity.java</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.componentpermission;
+</span><span class='line'>
+</span><span class='line'>import android.content.Intent;
+</span><span class='line'>import android.support.v7.app.ActionBarActivity;
+</span><span class='line'>import android.os.Bundle;
+</span><span class='line'>import android.view.View;
+</span><span class='line'>
+</span><span class='line'>public class MainActivity extends ActionBarActivity {
+</span><span class='line'>    @Override
+</span><span class='line'>    protected void onCreate(Bundle savedInstanceState) {
+</span><span class='line'>        super.onCreate(savedInstanceState);
+</span><span class='line'>        setContentView(R.layout.activity_main);
+</span><span class='line'>        findViewById(R.id.btnStartMyAty).setOnClickListener(new View.OnClickListener() {
+</span><span class='line'>            @Override
+</span><span class='line'>            public void onClick(View v) {
+</span><span class='line'>                startActivity(new Intent(MainActivity.this,MyAty.class));
+</span><span class='line'>            }
+</span><span class='line'>        });
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2 MyAty.java</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.componentpermission;
+</span><span class='line'>
+</span><span class='line'>import android.support.v7.app.ActionBarActivity;
+</span><span class='line'>import android.os.Bundle;
+</span><span class='line'>
+</span><span class='line'>public class MyAty extends ActionBarActivity {
+</span><span class='line'>    @Override
+</span><span class='line'>    protected void onCreate(Bundle savedInstanceState) {
+</span><span class='line'>        super.onCreate(savedInstanceState);
+</span><span class='line'>        setContentView(R.layout.activity_my_aty);
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>3 AndroidManifest.xml</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+</span><span class='line'>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+</span><span class='line'>    package="cn.loverobots.componentpermission" &gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;!-- 声明一个权限 --&gt;
+</span><span class='line'>    &lt;permission android:name="cn.loverobots.componentpermission.permission.MyAty"/&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;application
+</span><span class='line'>        android:allowBackup="true"
+</span><span class='line'>        android:icon="@mipmap/ic_launcher"
+</span><span class='line'>        android:label="@string/app_name"
+</span><span class='line'>        android:theme="@style/AppTheme" &gt;
+</span><span class='line'>        &lt;activity
+</span><span class='line'>            android:name=".MainActivity"
+</span><span class='line'>            android:label="@string/app_name" &gt;
+</span><span class='line'>            &lt;intent-filter&gt;
+</span><span class='line'>                &lt;action android:name="android.intent.action.MAIN" /&gt;
+</span><span class='line'>                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+</span><span class='line'>            &lt;/intent-filter&gt;
+</span><span class='line'>        &lt;/activity&gt;
+</span><span class='line'>        &lt;activity
+</span><span class='line'>            android:name=".MyAty"
+</span><span class='line'>            android:label="@string/title_activity_my_aty"
+</span><span class='line'>            android:permission="cn.loverobots.componentpermission.permission.MyAty"&gt;
+</span><span class='line'>            &lt;intent-filter&gt;
+</span><span class='line'>                &lt;category android:name="android.intent.category.DEFAULT"/&gt;
+</span><span class='line'>                &lt;action android:name="cn.loverobots.componentpermission.intent.action.MyAty"/&gt;
+</span><span class='line'>            &lt;/intent-filter&gt;
+</span><span class='line'>        &lt;/activity&gt;
+</span><span class='line'>    &lt;/application&gt;
+</span><span class='line'>&lt;/manifest&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>4 activity_main.xml</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+</span><span class='line'>    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+</span><span class='line'>    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+</span><span class='line'>    android:paddingRight="@dimen/activity_horizontal_margin"
+</span><span class='line'>    android:paddingTop="@dimen/activity_vertical_margin"
+</span><span class='line'>    android:paddingBottom="@dimen/activity_vertical_margin"
+</span><span class='line'>    tools:context=".MainActivity"&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;Button
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:text="启动MyAty"
+</span><span class='line'>        android:id="@+id/btnStartMyAty" /&gt;
+</span><span class='line'>&lt;/LinearLayout&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>5 activity_my_aty.xml</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+</span><span class='line'>    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+</span><span class='line'>    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+</span><span class='line'>    android:paddingRight="@dimen/activity_horizontal_margin"
+</span><span class='line'>    android:paddingTop="@dimen/activity_vertical_margin"
+</span><span class='line'>    android:paddingBottom="@dimen/activity_vertical_margin"
+</span><span class='line'>    tools:context="cn.loverobots.componentpermission.MyAty"&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;TextView
+</span><span class='line'>        android:text="这是一个被启动的Activity"
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content" /&gt;
+</span><span class='line'>&lt;/RelativeLayout&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>anotherApp模块中</h2>
+
+<h3>1 MainActivity.xml</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.anotherapp;
+</span><span class='line'>
+</span><span class='line'>import android.content.Intent;
+</span><span class='line'>import android.support.v7.app.ActionBarActivity;
+</span><span class='line'>import android.os.Bundle;
+</span><span class='line'>import android.view.View;
+</span><span class='line'>
+</span><span class='line'>public class MainActivity extends ActionBarActivity {
+</span><span class='line'>    @Override
+</span><span class='line'>    protected void onCreate(Bundle savedInstanceState) {
+</span><span class='line'>        super.onCreate(savedInstanceState);
+</span><span class='line'>        setContentView(R.layout.activity_main);
+</span><span class='line'>        findViewById(R.id.btnStartMyAty).setOnClickListener(new View.OnClickListener() {
+</span><span class='line'>            @Override
+</span><span class='line'>            public void onClick(View v) {
+</span><span class='line'>                startActivity(new Intent("cn.loverobots.componentpermission.intent.action.MyAty"));
+</span><span class='line'>            }
+</span><span class='line'>        });
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2 AndroidManifest.xml</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+</span><span class='line'>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+</span><span class='line'>    package="cn.loverobots.anotherapp" &gt;
+</span><span class='line'>    &lt;!-- 获取启动app中MyAty的启动权限 --&gt;
+</span><span class='line'>    &lt;uses-permission android:name="cn.loverobots.componentpermission.permission.MyAty"/&gt;
+</span><span class='line'>    &lt;application
+</span><span class='line'>        android:allowBackup="true"
+</span><span class='line'>        android:icon="@mipmap/ic_launcher"
+</span><span class='line'>        android:label="@string/app_name"
+</span><span class='line'>        android:theme="@style/AppTheme" &gt;
+</span><span class='line'>        &lt;activity
+</span><span class='line'>            android:name=".MainActivity"
+</span><span class='line'>            android:label="@string/app_name" &gt;
+</span><span class='line'>            &lt;intent-filter&gt;
+</span><span class='line'>                &lt;action android:name="android.intent.action.MAIN" /&gt;
+</span><span class='line'>                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+</span><span class='line'>            &lt;/intent-filter&gt;
+</span><span class='line'>        &lt;/activity&gt;
+</span><span class='line'>    &lt;/application&gt;
+</span><span class='line'>&lt;/manifest&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>3 activity_main.xml</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+</span><span class='line'>    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+</span><span class='line'>    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+</span><span class='line'>    android:paddingRight="@dimen/activity_horizontal_margin"
+</span><span class='line'>    android:paddingTop="@dimen/activity_vertical_margin"
+</span><span class='line'>    android:paddingBottom="@dimen/activity_vertical_margin"
+</span><span class='line'>    android:orientation="vertical"
+</span><span class='line'>    tools:context=".MainActivity"&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;Button
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:text="启动MyAty"
+</span><span class='line'>        android:id="@+id/btnStartMyAty" /&gt;
+</span><span class='line'>&lt;/LinearLayout&gt;</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android的权限系统——为代码添加权限检查]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/20/Android-authority-system-Add-permissions-for-code-check/"/>
+    <updated>2015-07-20T14:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/20/Android-authority-system-Add-permissions-for-code-check</id>
+    <content type="html"><![CDATA[<h3>1 MainActivity.java</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.checkpermissionincode;
+</span><span class='line'>
+</span><span class='line'>import android.support.v7.app.ActionBarActivity;
+</span><span class='line'>import android.os.Bundle;
+</span><span class='line'>
+</span><span class='line'>public class MainActivity extends ActionBarActivity {
+</span><span class='line'>    @Override
+</span><span class='line'>    protected void onCreate(Bundle savedInstanceState) {
+</span><span class='line'>        super.onCreate(savedInstanceState);
+</span><span class='line'>        setContentView(R.layout.activity_main);
+</span><span class='line'>        Hello.sayHello(this);
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2 Hello.java</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.checkpermissionincode;
+</span><span class='line'>
+</span><span class='line'>import android.content.Context;
+</span><span class='line'>import android.content.pm.PackageManager;
+</span><span class='line'>
+</span><span class='line'>public class Hello {
+</span><span class='line'>    public static final String PERMISSION_SAY_HELLO = "cn.loverobots.checkpermissionincode.permission.SAY_HELLO";
+</span><span class='line'>    public static void sayHello(Context context){
+</span><span class='line'>        int checkResult = context.checkCallingOrSelfPermission(PERMISSION_SAY_HELLO);
+</span><span class='line'>        if(checkResult != PackageManager.PERMISSION_GRANTED){
+</span><span class='line'>            throw new SecurityException("执行sayHello方法需要有cn.loverobots.checkpermissionincode.permission.SAY_HELLO权限");
+</span><span class='line'>        }
+</span><span class='line'>        System.out.println("Hello JACK的机器人");
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>3 AndroidManifest.xml</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+</span><span class='line'>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+</span><span class='line'>    package="cn.loverobots.checkpermissionincode" &gt;
+</span><span class='line'>    &lt;permission android:name="cn.loverobots.checkpermissionincode.permission.SAY_HELLO"/&gt;
+</span><span class='line'>    &lt;!-- 不使用uses-permission获取权限，会抛出一个自定义的错误提示“执行sayHello方法需要有cn.loverobots.checkpermissionincode.permission.SAY_HELLO权限” --&gt;
+</span><span class='line'>    &lt;uses-permission android:name="cn.loverobots.checkpermissionincode.permission.SAY_HELLO"/&gt;
+</span><span class='line'>    &lt;application
+</span><span class='line'>        android:allowBackup="true"
+</span><span class='line'>        android:icon="@mipmap/ic_launcher"
+</span><span class='line'>        android:label="@string/app_name"
+</span><span class='line'>        android:theme="@style/AppTheme" &gt;
+</span><span class='line'>        &lt;activity
+</span><span class='line'>            android:name=".MainActivity"
+</span><span class='line'>            android:label="@string/app_name" &gt;
+</span><span class='line'>            &lt;intent-filter&gt;
+</span><span class='line'>                &lt;action android:name="android.intent.action.MAIN" /&gt;
+</span><span class='line'>                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+</span><span class='line'>            &lt;/intent-filter&gt;
+</span><span class='line'>        &lt;/activity&gt;
+</span><span class='line'>    &lt;/application&gt;
+</span><span class='line'>&lt;/manifest&gt;</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android的权限系统——请求权限实例]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/20/Android-authority-system-Request-permission-instance/"/>
+    <updated>2015-07-20T12:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/20/Android-authority-system-Request-permission-instance</id>
+    <content type="html"><![CDATA[<h2>权限系统的目的</h2>
+
+<p>增加权限系统的目的是为了让用户能够查看到当前软件所具有的权限，是一种安全机制，即如果用户不想要将要安装的软件具有此权限，可以拒绝安装。</p>
+
+<h2>代码示例</h2>
+
+<h3>1 MainActivity.java</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.learnwebview;
+</span><span class='line'>
+</span><span class='line'>import android.support.v7.app.ActionBarActivity;
+</span><span class='line'>import android.os.Bundle;
+</span><span class='line'>import android.webkit.WebView;
+</span><span class='line'>
+</span><span class='line'>public class MainActivity extends ActionBarActivity {
+</span><span class='line'>    private WebView webView;
+</span><span class='line'>    @Override
+</span><span class='line'>    protected void onCreate(Bundle savedInstanceState) {
+</span><span class='line'>        super.onCreate(savedInstanceState);
+</span><span class='line'>        setContentView(R.layout.activity_main);
+</span><span class='line'>        webView = (WebView) findViewById(R.id.webView);
+</span><span class='line'>        webView.loadUrl("http://www.loverobots.cn");
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2 activity_main.xml</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+</span><span class='line'>    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+</span><span class='line'>    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+</span><span class='line'>    android:paddingRight="@dimen/activity_horizontal_margin"
+</span><span class='line'>    android:paddingTop="@dimen/activity_vertical_margin"
+</span><span class='line'>    android:paddingBottom="@dimen/activity_vertical_margin"
+</span><span class='line'>    android:orientation="vertical"
+</span><span class='line'>    tools:context=".MainActivity"&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;WebView
+</span><span class='line'>        android:layout_width="match_parent"
+</span><span class='line'>        android:layout_height="match_parent"
+</span><span class='line'>        android:id="@+id/webView" /&gt;
+</span><span class='line'>&lt;/LinearLayout&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>3 AndroidManifest.xml</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+</span><span class='line'>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+</span><span class='line'>    package="cn.loverobots.learnwebview" &gt;
+</span><span class='line'>    &lt;!-- 由于没有请求权限，会报错Webpage not available，这时需要通过以下方式获取访问Internet的权限 --&gt;
+</span><span class='line'>    &lt;uses-permission android:name="android.permission.INTERNET"/&gt;
+</span><span class='line'>    &lt;!-- 增加获取权限的意义是，软件使用用户能够方便用户查看当前软件所具有的权限，是一种权限机制 --&gt;
+</span><span class='line'>    &lt;application
+</span><span class='line'>        android:allowBackup="true"
+</span><span class='line'>        android:icon="@mipmap/ic_launcher"
+</span><span class='line'>        android:label="@string/app_name"
+</span><span class='line'>        android:theme="@style/AppTheme" &gt;
+</span><span class='line'>        &lt;activity
+</span><span class='line'>            android:name=".MainActivity"
+</span><span class='line'>            android:label="@string/app_name" &gt;
+</span><span class='line'>            &lt;intent-filter&gt;
+</span><span class='line'>                &lt;action android:name="android.intent.action.MAIN" /&gt;
+</span><span class='line'>                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+</span><span class='line'>            &lt;/intent-filter&gt;
+</span><span class='line'>        &lt;/activity&gt;
+</span><span class='line'>    &lt;/application&gt;
+</span><span class='line'>&lt;/manifest&gt;
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Android日志系统]]></title>
@@ -4756,324 +5334,6 @@
 </span><span class='line'>        android:layout_height="wrap_content"
 </span><span class='line'>        android:text="启动BAty"
 </span><span class='line'>        android:id="@+id/btnBAty" /&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;/LinearLayout&gt;</span></code></pre></td></tr></table></div></figure>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android面试软技能]]></title>
-    <link href="http://gitdeng.github.io/blog/2015/07/09/Android-interview-soft-skills/"/>
-    <updated>2015-07-09T08:39:20+08:00</updated>
-    <id>http://gitdeng.github.io/blog/2015/07/09/Android-interview-soft-skills</id>
-    <content type="html"><![CDATA[<h2>1 编写简历</h2>
-
-<p>1.1 首页简明扼要，突出主要技能。<br/>
-1.2 后面可以展开叙述，工作经历、项目经验、大学经历等越多越好。<br/>
-1.3 实事求是。</p>
-
-<h2>2 礼仪</h2>
-
-<p>2.1 打扮得体，需具有浓浓的程序员气质。（戴眼镜、穿着得体随意、带笔记本电脑、背双肩包） <br/>
-2.2 举止端庄。（坐正，不乱动）<br/>
-2.3 谈吐得当。<br/>
-2.4 朝气、阳光、自信、意志坚定。</p>
-
-<h2>3 自我介绍</h2>
-
-<p>3.1 不要紧张。 <br/>
-3.2 介绍自身属性。（聊到兴趣爱好，需要跟工作有相关联系，比如喜欢长跑，可以培养人坚定的意志）<br/>
-3.3 介绍技能特长。<br/>
-3.4 介绍工作经历。（没经历，可以介绍一下对Android的了解，行业看法，职业认知等）<br/>
-3.5 介绍项目经验。</p>
-
-<h2>4 沟通技巧</h2>
-
-<p>4.1 避免四目相对，看对方鼻子。（这可以让对方感觉更舒服，有被尊重的感觉。)<br/>
-4.2 尽量主动开辟话题，产生一种讨论的氛围。（比如讨论自己做过的某一个项目，某个功能很好玩）（可以打乱面试官准备的提问套路，对自己更有利）<br/>
-4.3 越挫越勇。<br/>
-4.4 没有答出来的问题，尽量当场问结果，这样才能一步步改进。<br/>
-4.5 如果被拒，尽量问明原因。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android面试硬技能]]></title>
-    <link href="http://gitdeng.github.io/blog/2015/07/09/Android-interview-hard-skills/"/>
-    <updated>2015-07-09T08:39:20+08:00</updated>
-    <id>http://gitdeng.github.io/blog/2015/07/09/Android-interview-hard-skills</id>
-    <content type="html"><![CDATA[<h2>1 Java基础</h2>
-
-<p>1.1 面向对象<br/>
-1.2 Java集合框架<br/>
-1.3 异常处理<br/>
-1.4 Java反射<br/>
-1.5 泛型<br/>
-1.6 文件操作</p>
-
-<h2>2 Android基础</h2>
-
-<p>2.1 Activity<br/>
-2.2 Service<br/>
-2.3 BroadcastReceiver<br/>
-2.4 ContentProvider<br/>
-2.5 权限系统<br/>
-2.6 Intent与IntentFilter</p>
-
-<h2>3 UI控件与布局</h2>
-
-<p>3.1 常用的UI控件如Button、CheckBox等。<br/>
-3.2 常用的布局如LinearLayout、RelativeLayout、FrameLayout等。<br/>
-3.3 自定义控件<br/>
-3.4 View及SurfaceView绘图API<br/>
-3.5 视图动画效果<br/>
-3.6 布局动画效果<br/>
-3.7 自定义动画效果<br/>
-3.8 效率优化及常见问题解决</p>
-
-<h2>4 传感器</h2>
-
-<p>4.1 掌握getSystemService函数与SensorManager类的用法。<br/>
-4.2 学会使用加速度传感器<br/>
-4.3 学会使用指南针<br/>
-4.4 学会使用陀螺仪<br/>
-4.5 熟悉其它常用的传感器</p>
-
-<h2>5 定位系统</h2>
-
-<p>5.1 掌握getSystemService函数与LocationManager类的用法<br/>
-5.2 学会使用Android提供的定位系统API<br/>
-5.3 学会使用百度地图或者其它国内的地图服务商提供的API</p>
-
-<h2>6 常用数据格式</h2>
-
-<p>6.1 JSON格式数据的解析与生成：适合用程序去生成、解析、传输。<br/>
-6.2 XML格式数据的解析与生成：适合手动来编写。</p>
-
-<h2>7 网络编程相关</h2>
-
-<p>7.1 URLConnection<br/>
-7.2 HttpClient<br/>
-7.3 Socket<br/>
-7.4 *NIO：网络编程，主要特性是异步通信。（了解）</p>
-
-<h2>8 NDK与C/C++</h2>
-
-<p>8.1 NDK集成开发环境搭建<br/>
-8.2 Android.mk文件<br/>
-8.3 Application.mk文件<br/>
-8.4 javah工具的使用<br/>
-8.5 java与C++通信及需要注意的问题</p>
-
-<h2>9 游戏开发</h2>
-
-<p>9.1 Cocos2d-x框架开发Android游戏<br/>
-9.2 使用Unity开发Android游戏</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[获取Activity的返回参数]]></title>
-    <link href="http://gitdeng.github.io/blog/2015/07/08/Get-the-return-parameter-of-Activity/"/>
-    <updated>2015-07-08T16:39:20+08:00</updated>
-    <id>http://gitdeng.github.io/blog/2015/07/08/Get-the-return-parameter-of-Activity</id>
-    <content type="html"><![CDATA[<h2>1 MainActivity</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>private TextView textView;
-</span><span class='line'>
-</span><span class='line'>@Override
-</span><span class='line'>protected void onCreate(Bundle savedInstanceState) {
-</span><span class='line'>    super.onCreate(savedInstanceState);
-</span><span class='line'>    setContentView(R.layout.activity_main);
-</span><span class='line'>
-</span><span class='line'>    textView = (TextView) findViewById(R.id.textView);//获取Activity返回的数据
-</span><span class='line'>
-</span><span class='line'>    findViewById(R.id.btnStartAty).setOnClickListener(new View.OnClickListener() {
-</span><span class='line'>        @Override
-</span><span class='line'>        public void onClick(View v) {
-</span><span class='line'>            Intent i = new Intent(MainActivity.this,TheAty.class);
-</span><span class='line'>//                startActivity(i);
-</span><span class='line'>            startActivityForResult(i,0);//只有通过此种方法才能够接收带参数的Activity，其中0是请求代码
-</span><span class='line'>        }
-</span><span class='line'>    });
-</span><span class='line'>}
-</span><span class='line'>
-</span><span class='line'>@Override
-</span><span class='line'>protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-</span><span class='line'>    super.onActivityResult(requestCode, resultCode, data);
-</span><span class='line'>    textView.setText("另一个Activity返回的数据是："+data.getStringExtra("data"));
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>1 activity_main.xml</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-</span><span class='line'>    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-</span><span class='line'>    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
-</span><span class='line'>    android:paddingRight="@dimen/activity_horizontal_margin"
-</span><span class='line'>    android:paddingTop="@dimen/activity_vertical_margin"
-</span><span class='line'>    android:paddingBottom="@dimen/activity_vertical_margin"
-</span><span class='line'>    android:orientation="vertical"
-</span><span class='line'>    tools:context=".MainActivity"&gt;
-</span><span class='line'>
-</span><span class='line'>    &lt;Button
-</span><span class='line'>        android:layout_width="wrap_content"
-</span><span class='line'>        android:layout_height="wrap_content"
-</span><span class='line'>        android:text="启动另一个Activity"
-</span><span class='line'>        android:id="@+id/btnStartAty" /&gt;
-</span><span class='line'>
-</span><span class='line'>    &lt;TextView
-</span><span class='line'>        android:layout_width="wrap_content"
-</span><span class='line'>        android:layout_height="wrap_content"
-</span><span class='line'>        android:text="New Text"
-</span><span class='line'>        android:id="@+id/textView" /&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;/LinearLayout&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>2 TheAty</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>private EditText editText;
-</span><span class='line'>
-</span><span class='line'>@Override
-</span><span class='line'>protected void onCreate(Bundle savedInstanceState) {
-</span><span class='line'>    super.onCreate(savedInstanceState);
-</span><span class='line'>    setContentView(R.layout.activity_the_aty);
-</span><span class='line'>    tv = (TextView) findViewById(R.id.tv);
-</span><span class='line'>
-</span><span class='line'>    editText = (EditText) findViewById(R.id.editText);
-</span><span class='line'>
-</span><span class='line'>    Intent i = getIntent();
-</span><span class='line'>
-</span><span class='line'>    findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {//设置按钮动作
-</span><span class='line'>        @Override
-</span><span class='line'>        public void onClick(View v) {
-</span><span class='line'>            Intent i = new Intent();
-</span><span class='line'>            i.putExtra("data",editText.getText().toString());
-</span><span class='line'>            setResult(1, i);//将editText中字符串作为结果传递
-</span><span class='line'>            finish();//结束当前的Activity
-</span><span class='line'>        }
-</span><span class='line'>    });
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>2 activity_the_aty.xml</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-</span><span class='line'>    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-</span><span class='line'>    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
-</span><span class='line'>    android:paddingRight="@dimen/activity_horizontal_margin"
-</span><span class='line'>    android:paddingTop="@dimen/activity_vertical_margin"
-</span><span class='line'>    android:paddingBottom="@dimen/activity_vertical_margin"
-</span><span class='line'>    android:orientation="vertical"
-</span><span class='line'>    tools:context="cn.loverobots.sendargs.TheAty"&gt;
-</span><span class='line'>
-</span><span class='line'>    &lt;TextView android:text="@string/hello_world" android:layout_width="wrap_content"
-</span><span class='line'>        android:layout_height="wrap_content" android:id="@+id/tv"/&gt;
-</span><span class='line'>
-</span><span class='line'>    &lt;EditText
-</span><span class='line'>        android:layout_width="match_parent"
-</span><span class='line'>        android:layout_height="wrap_content"
-</span><span class='line'>        android:id="@+id/editText" /&gt;
-</span><span class='line'>
-</span><span class='line'>    &lt;Button
-</span><span class='line'>        android:layout_width="wrap_content"
-</span><span class='line'>        android:layout_height="wrap_content"
-</span><span class='line'>        android:text="Send Back"
-</span><span class='line'>        android:id="@+id/button" /&gt;
 </span><span class='line'>
 </span><span class='line'>&lt;/LinearLayout&gt;</span></code></pre></td></tr></table></div></figure>
 

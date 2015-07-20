@@ -1,0 +1,315 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Android的权限系统——为代码添加权限检查 - 程序员笔记</title>
+  <meta name="author" content="程序员笔记">
+
+  
+  <meta name="description" content="1 MainActivity.java 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+package cn.loverobots.checkpermissionincode; import android.support.v7.app.ActionBarActivity; &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://gitdeng.github.io/blog/2015/07/20/Android-authority-system-Add-permissions-for-code-check/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="程序员笔记" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">程序员笔记</a></h1>
+  
+    <h2>记录菜鸟程序员的成长旅程</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="gitdeng.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">文章总览</a></li>
+  <li><a href="/blog/archives">标题总览</a></li>
+  <li><a href="/blog/categories/basic-cognition">基本认识</a></li>
+  <li><a href="/blog/categories/android-basic">Android基础知识</a></li>
+</ul>
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Android的权限系统——为代码添加权限检查</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-07-20T14:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>2:39 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h3>1 MainActivity.java</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.checkpermissionincode;
+</span><span class='line'>
+</span><span class='line'>import android.support.v7.app.ActionBarActivity;
+</span><span class='line'>import android.os.Bundle;
+</span><span class='line'>
+</span><span class='line'>public class MainActivity extends ActionBarActivity {
+</span><span class='line'>    @Override
+</span><span class='line'>    protected void onCreate(Bundle savedInstanceState) {
+</span><span class='line'>        super.onCreate(savedInstanceState);
+</span><span class='line'>        setContentView(R.layout.activity_main);
+</span><span class='line'>        Hello.sayHello(this);
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2 Hello.java</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.checkpermissionincode;
+</span><span class='line'>
+</span><span class='line'>import android.content.Context;
+</span><span class='line'>import android.content.pm.PackageManager;
+</span><span class='line'>
+</span><span class='line'>public class Hello {
+</span><span class='line'>    public static final String PERMISSION_SAY_HELLO = "cn.loverobots.checkpermissionincode.permission.SAY_HELLO";
+</span><span class='line'>    public static void sayHello(Context context){
+</span><span class='line'>        int checkResult = context.checkCallingOrSelfPermission(PERMISSION_SAY_HELLO);
+</span><span class='line'>        if(checkResult != PackageManager.PERMISSION_GRANTED){
+</span><span class='line'>            throw new SecurityException("执行sayHello方法需要有cn.loverobots.checkpermissionincode.permission.SAY_HELLO权限");
+</span><span class='line'>        }
+</span><span class='line'>        System.out.println("Hello JACK的机器人");
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>3 AndroidManifest.xml</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+</span><span class='line'>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+</span><span class='line'>    package="cn.loverobots.checkpermissionincode" &gt;
+</span><span class='line'>    &lt;permission android:name="cn.loverobots.checkpermissionincode.permission.SAY_HELLO"/&gt;
+</span><span class='line'>    &lt;!-- 不使用uses-permission获取权限，会抛出一个自定义的错误提示“执行sayHello方法需要有cn.loverobots.checkpermissionincode.permission.SAY_HELLO权限” --&gt;
+</span><span class='line'>    &lt;uses-permission android:name="cn.loverobots.checkpermissionincode.permission.SAY_HELLO"/&gt;
+</span><span class='line'>    &lt;application
+</span><span class='line'>        android:allowBackup="true"
+</span><span class='line'>        android:icon="@mipmap/ic_launcher"
+</span><span class='line'>        android:label="@string/app_name"
+</span><span class='line'>        android:theme="@style/AppTheme" &gt;
+</span><span class='line'>        &lt;activity
+</span><span class='line'>            android:name=".MainActivity"
+</span><span class='line'>            android:label="@string/app_name" &gt;
+</span><span class='line'>            &lt;intent-filter&gt;
+</span><span class='line'>                &lt;action android:name="android.intent.action.MAIN" /&gt;
+</span><span class='line'>                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+</span><span class='line'>            &lt;/intent-filter&gt;
+</span><span class='line'>        &lt;/activity&gt;
+</span><span class='line'>    &lt;/application&gt;
+</span><span class='line'>&lt;/manifest&gt;</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">程序员笔记</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-07-20T14:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>2:39 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/android/'>android</a>, <a class='category' href='/blog/categories/android-basic/'>android_basic</a>, <a class='category' href='/blog/categories/quan-xian-xi-tong/'>权限系统</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/07/20/Android-authority-system-Request-permission-instance/" title="Previous Post: Android的权限系统——请求权限实例">&laquo; Android的权限系统——请求权限实例</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2015/07/20/Android-authority-system-Add-permissions-for-basic-components/" title="Next Post: Android的权限系统——为基本组件添加权限检查">Android的权限系统——为基本组件添加权限检查 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/07/20/Android-authority-system-Add-permissions-for-basic-components/">Android的权限系统——为基本组件添加权限检查</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/07/20/Android-authority-system-Add-permissions-for-code-check/">Android的权限系统——为代码添加权限检查</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/07/20/Android-authority-system-Request-permission-instance/">Android的权限系统——请求权限实例</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/07/20/Android-log-system/">Android日志系统</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/07/20/BroadcastReceiver-priority/">BroadcastReceiver的优先级</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - 程序员笔记 -
+  <span class="credit">Powered by <a href="http://www.loverobots.cn/">JACK的机器人</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
