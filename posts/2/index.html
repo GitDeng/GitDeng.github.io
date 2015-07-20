@@ -9,7 +9,7 @@
   <meta name="author" content="程序员笔记">
 
   
-  <meta name="description" content="简 介 1 Context的作用 访问全局信息的接口，例如访问文字、图片资源等。 2 Application的用途 Application用于多个组件之间进行数据的共享，对于同一个应用来说是唯一的。 代 码 1 App(继承Application) 1
+  <meta name="description" content="简 介 当一个应用程序中有多个Activity时，不管先启动哪个Activity，Application里的onCreate函数都会先执行，这样就可以利用Application进行初始化操作。 代 码 1 App(继承Application) 1
 2
 3
 4
@@ -19,7 +19,8 @@
 8
 9
 10
-11 &hellip;">
+11
+12 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -76,6 +77,189 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/12/Application-life-cycle/">Application的生命周期</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-07-12T02:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>2:39 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>简  介</h2>
+
+<p>当一个应用程序中有多个Activity时，不管先启动哪个Activity，Application里的onCreate函数都会先执行，这样就可以利用Application进行初始化操作。</p>
+
+<h2>代  码</h2>
+
+<h3>1 App(继承Application)</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.learncontext;
+</span><span class='line'>
+</span><span class='line'>import android.app.Application;
+</span><span class='line'>import android.content.res.Configuration;
+</span><span class='line'>
+</span><span class='line'>public class App extends Application {
+</span><span class='line'>
+</span><span class='line'>    private String textData = "default";
+</span><span class='line'>    public void setTextData(String textData) {
+</span><span class='line'>        this.textData = textData;
+</span><span class='line'>    }
+</span><span class='line'>    public String getTextData() {
+</span><span class='line'>        return textData;
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    //Application中生命周期相关的函数
+</span><span class='line'>    //在创建程序时执行
+</span><span class='line'>    @Override
+</span><span class='line'>    public void onCreate() {
+</span><span class='line'>        super.onCreate();
+</span><span class='line'>        System.out.println("App onCreate");//当Application中onCreate执行时，会在控制台输出
+</span><span class='line'>    }
+</span><span class='line'>    //程序结束时执行
+</span><span class='line'>    @Override
+</span><span class='line'>    public void onTerminate() {
+</span><span class='line'>        super.onTerminate();
+</span><span class='line'>    }
+</span><span class='line'>    //在低内存时执行
+</span><span class='line'>    @Override
+</span><span class='line'>    public void onLowMemory() {
+</span><span class='line'>        super.onLowMemory();
+</span><span class='line'>    }
+</span><span class='line'>    //程序在进行内存清理时执行
+</span><span class='line'>    @Override
+</span><span class='line'>    public void onTrimMemory(int level) {
+</span><span class='line'>        super.onTrimMemory(level);
+</span><span class='line'>    }
+</span><span class='line'>    //程序配置发生改变时执行
+</span><span class='line'>    @Override
+</span><span class='line'>    public void onConfigurationChanged(Configuration newConfig) {
+</span><span class='line'>        super.onConfigurationChanged(newConfig);
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2 Main1(Activity)</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.learncontext;
+</span><span class='line'>
+</span><span class='line'>import android.support.v7.app.ActionBarActivity;
+</span><span class='line'>import android.os.Bundle;
+</span><span class='line'>import android.view.Menu;
+</span><span class='line'>import android.view.MenuItem;
+</span><span class='line'>
+</span><span class='line'>public class Main1 extends ActionBarActivity {
+</span><span class='line'>    @Override
+</span><span class='line'>    protected void onCreate(Bundle savedInstanceState) {
+</span><span class='line'>        super.onCreate(savedInstanceState);
+</span><span class='line'>        System.out.println("Main1 onCreate");//当Main1的onCreate函数执行时会在控制台输出
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>3 Main2(Activity)</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.learncontext;
+</span><span class='line'>
+</span><span class='line'>import android.support.v7.app.ActionBarActivity;
+</span><span class='line'>import android.os.Bundle;
+</span><span class='line'>import android.view.Menu;
+</span><span class='line'>import android.view.MenuItem;
+</span><span class='line'>
+</span><span class='line'>public class Main2 extends ActionBarActivity {
+</span><span class='line'>    @Override
+</span><span class='line'>    protected void onCreate(Bundle savedInstanceState) {
+</span><span class='line'>        super.onCreate(savedInstanceState);
+</span><span class='line'>        System.out.println("Main2 onCreate");
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1731,173 +1915,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/07/08/Value-transfer-between-Activity-Parcelable/">Activity之间的值传递（实现Parcelable）</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2015-07-08T14:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>8</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>2:39 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>1 值对象</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>public class User implements Parcelable{
-</span><span class='line'>    private String name;
-</span><span class='line'>    private int age;
-</span><span class='line'>    public void setName(String name) {
-</span><span class='line'>        this.name = name;
-</span><span class='line'>    }
-</span><span class='line'>    public void setAge(int age) {
-</span><span class='line'>        this.age = age;
-</span><span class='line'>    }
-</span><span class='line'>    public String getName() {
-</span><span class='line'>        return name;
-</span><span class='line'>    }
-</span><span class='line'>    public int getAge() {
-</span><span class='line'>        return age;
-</span><span class='line'>    }
-</span><span class='line'>    public User (String name,int age){
-</span><span class='line'>        this.name = name;
-</span><span class='line'>        this.age = age;
-</span><span class='line'>    }
-</span><span class='line'>    @Override
-</span><span class='line'>    public int describeContents() {
-</span><span class='line'>        return 0;
-</span><span class='line'>    }
-</span><span class='line'>    @Override
-</span><span class='line'>    public void writeToParcel(Parcel dest, int flags) {
-</span><span class='line'>        //向目标手动写数据
-</span><span class='line'>        dest.writeString(getName());
-</span><span class='line'>        dest.writeInt(getAge());
-</span><span class='line'>    }
-</span><span class='line'>    public static final Creator&lt;User&gt; CREATOR = new Creator&lt;User&gt;() {
-</span><span class='line'>        @Override
-</span><span class='line'>        public User createFromParcel(Parcel source) {
-</span><span class='line'>            return new User(source.readString(),source.readInt());
-</span><span class='line'>        }
-</span><span class='line'>        @Override
-</span><span class='line'>        public User[] newArray(int size) {
-</span><span class='line'>            return new User[size];
-</span><span class='line'>        }
-</span><span class='line'>    };
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>2 MainActivity</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>@Override
-</span><span class='line'>protected void onCreate(Bundle savedInstanceState) {
-</span><span class='line'>    super.onCreate(savedInstanceState);
-</span><span class='line'>    setContentView(R.layout.activity_main);
-</span><span class='line'>
-</span><span class='line'>    findViewById(R.id.btnStartAty).setOnClickListener(new View.OnClickListener() {
-</span><span class='line'>        @Override
-</span><span class='line'>        public void onClick(View v) {
-</span><span class='line'>            Intent i = new Intent(MainActivity.this,TheAty.class);
-</span><span class='line'>            i.putExtra("user",new User("jackrobot",20));//传递值对象，同时对值对象进行初始化
-</span><span class='line'>            startActivity(i);
-</span><span class='line'>        }
-</span><span class='line'>    });
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>3 TheAty</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>private TextView tv;
-</span><span class='line'>@Override
-</span><span class='line'>protected void onCreate(Bundle savedInstanceState) {
-</span><span class='line'>    super.onCreate(savedInstanceState);
-</span><span class='line'>    setContentView(R.layout.activity_the_aty);
-</span><span class='line'>    tv = (TextView) findViewById(R.id.tv);
-</span><span class='line'>    Intent i = getIntent();
-</span><span class='line'>    User user = i.getParcelableExtra("user");//以Parcelable的方式获取值对象
-</span><span class='line'>    tv.setText(String.format("User info(name=%s , age=%d)",user.getName(),user.getAge()));
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; 前一页</a>
@@ -1915,6 +1932,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/07/20/Android-log-system/">Android日志系统</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/07/20/BroadcastReceiver-priority/">BroadcastReceiver的优先级</a>
       </li>
     
@@ -1928,10 +1949,6 @@
     
       <li class="post">
         <a href="/blog/2015/07/18/Cross-application-binding-Service/">跨应用绑定Service</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/07/18/Cross-application-startup-Service/">跨应用启动Service</a>
       </li>
     
   </ul>

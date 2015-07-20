@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Android日志系统 | 程序员笔记]]></title>
+  <link href="http://gitdeng.github.io/blog/categories/androidri-zhi-xi-tong/atom.xml" rel="self"/>
+  <link href="http://gitdeng.github.io/"/>
+  <updated>2015-07-20T19:42:43+08:00</updated>
+  <id>http://gitdeng.github.io/</id>
+  <author>
+    <name><![CDATA[程序员笔记]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Android日志系统]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/20/Android-log-system/"/>
+    <updated>2015-07-20T08:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/20/Android-log-system</id>
+    <content type="html"><![CDATA[<h2>代码示例</h2>
+
+<pre><code>package cn.loverobots.learnlog;
+
+import android.support.v7.app.ActionBarActivity;
+import android.os.Bundle;
+import android.util.Log;
+
+
+public class MainActivity extends ActionBarActivity {
+    //指明Android日志信息是从MainActivity中输出的，且TAG可用于日志分类显示
+    private static String TAG = "MainActivity";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        //Java语言本身提供的日志输出方式
+        System.out.println("Java普通日志Info");
+        //错误提示信息级别比普通日志信息要高
+        System.err.println("Java错误日志Warn");
+        //Android提供的日志API，级别从上到下依次降低
+        Log.e(TAG,"错误信息");
+        Log.w(TAG,"警告信息");
+        Log.i(TAG,"普通信息");
+        Log.d(TAG,"调试信息");
+        Log.v(TAG,"无用信息");//比如一些程序员的唠叨话
+        Log.e("MSG","其他信息");
+    }
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>

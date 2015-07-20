@@ -9,7 +9,7 @@
   <meta name="author" content="程序员笔记">
 
   
-  <meta name="description" content=" Blog Archives Recent Posts BroadcastReceiver的优先级 动态注册和注销BroadcastReceiver 跨应用绑定Servic并通信 跨应用绑定Service 跨应用启动Service ">
+  <meta name="description" content=" Blog Archives Recent Posts Android日志系统 BroadcastReceiver的优先级 动态注册和注销BroadcastReceiver 跨应用绑定Servic并通信 跨应用绑定Service ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +80,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/07/20/Android-log-system/">Android日志系统</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/07/20/BroadcastReceiver-priority/">BroadcastReceiver的优先级</a>
       </li>
     
@@ -93,10 +97,6 @@
     
       <li class="post">
         <a href="/blog/2015/07/18/Cross-application-binding-Service/">跨应用绑定Service</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/07/18/Cross-application-startup-Service/">跨应用启动Service</a>
       </li>
     
   </ul>
