@@ -5,14 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>BroadcastReceiver的优先级 - 程序员笔记</title>
+  <title>Android实战项目——倒计时 - 程序员笔记</title>
   <meta name="author" content="程序员笔记">
 
   
-  <meta name="description" content="使用简介 在AndroidManifest.xml文件中注册receiver时，可在过滤器中增加优先级设置(priority)，数字越大优先级越高，越早执行。 1
-2
-3
-&lt;intent-filter android:priority="7"&gt; &lt;action android: &hellip;">
+  <meta name="description" content="项目背景 在Android系统中UI操作并不是线程安全的，如果多个线程并发的去操作同一个组件，可能导致线程安全问题。为了解决这一个问题，Android 制定了一条规则：只允许 UI 线程来修改 UI 组件的属性等，也就是说必须单线程模型， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -21,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://gitdeng.github.io/blog/2015/07/20/BroadcastReceiver-priority/">
+  <link rel="canonical" href="http://gitdeng.github.io/blog/2015/07/21/Android-project-actual-combat-Countdown/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="程序员笔记" type="application/atom+xml">
@@ -73,7 +70,7 @@
   
   <header>
     
-      <h1 class="entry-title">BroadcastReceiver的优先级</h1>
+      <h1 class="entry-title">Android实战项目——倒计时</h1>
     
     
       <p class="meta">
@@ -82,30 +79,25 @@
 
 
 
-<time class='entry-date' datetime='2015-07-20T00:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>12:39 am</span></time>
+<time class='entry-date' datetime='2015-07-21T20:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>21</span><span class='date-suffix'>st</span>, <span class='date-year'>2015</span></span> <span class='time'>8:39 pm</span></time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><h2>使用简介</h2>
+<div class="entry-content"><h2>项目背景</h2>
 
-<p>在AndroidManifest.xml文件中注册receiver时，可在过滤器中增加优先级设置(priority)，数字越大优先级越高，越早执行。</p>
+<p>在Android系统中UI操作并不是线程安全的，如果多个线程并发的去操作同一个组件，可能导致线程安全问题。为了解决这一个问题，Android 制定了一条规则：只允许 UI 线程来修改 UI 组件的属性等，也就是说必须单线程模型，这样导致如果在UI界面进行一个耗时较长的数据更新等就会形成程序假死现象，也就是ANR异常，如果20秒中没有完成程序就会强制关闭。所以比如另一个线程要修改UI组件的时候，就需要借助Handler消息机制了。</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;intent-filter android:priority="7"&gt;
-</span><span class='line'>                &lt;action android:name="cn.loverobots.learnbroadcastreceiver.intent.action.MyReceiver"/&gt;
-</span><span class='line'>&lt;/intent-filter&gt;</span></code></pre></td></tr></table></div></figure>
+<h2>核心内容</h2>
 
+<p>1 UI布局<br/>
+2 Handler创建<br/>
+3 计时器创建<br/>
+4 逻辑实现</p>
 
-<h2>注意事项</h2>
-
-<p>采用abordBroadcast();方法进行广播中断时，不能采用sendBroadcast(new Intent);方式进行广播发送，会报错（BroadcastReceiver trying to return result during a non-ordered broadcast），且不会有中断广播效果。应该采用sendOrderedBroadcast(i,null);方式发送广播。</p>
-
-<h2>代码举例</h2>
+<h2>代码示例</h2>
 
 <h3>1 AndroidManifest.xml</h3>
 
@@ -128,29 +120,9 @@
 <span class='line-number'>17</span>
 <span class='line-number'>18</span>
 <span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 </span><span class='line'>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
-</span><span class='line'>    package="cn.loverobots.learnbroadcastreceiver" &gt;
-</span><span class='line'>
+</span><span class='line'>    package="cn.loverobots.counttime" &gt;
 </span><span class='line'>    &lt;application
 </span><span class='line'>        android:allowBackup="true"
 </span><span class='line'>        android:icon="@mipmap/ic_launcher"
@@ -165,25 +137,7 @@
 </span><span class='line'>                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
 </span><span class='line'>            &lt;/intent-filter&gt;
 </span><span class='line'>        &lt;/activity&gt;
-</span><span class='line'>
-</span><span class='line'>        &lt;receiver
-</span><span class='line'>            android:name=".MyReceiver2"
-</span><span class='line'>            android:enabled="true"
-</span><span class='line'>            android:exported="true"&gt;
-</span><span class='line'>            &lt;intent-filter android:priority="7"&gt;
-</span><span class='line'>                &lt;action android:name="cn.loverobots.learnbroadcastreceiver.intent.action.MyReceiver"/&gt;
-</span><span class='line'>            &lt;/intent-filter&gt;
-</span><span class='line'>        &lt;/receiver&gt;
-</span><span class='line'>        &lt;receiver
-</span><span class='line'>            android:name=".MyReceiver"
-</span><span class='line'>            android:enabled="true"
-</span><span class='line'>            android:exported="true"&gt;
-</span><span class='line'>            &lt;intent-filter android:priority="8"&gt;
-</span><span class='line'>                &lt;action android:name="cn.loverobots.learnbroadcastreceiver.intent.action.MyReceiver"/&gt;
-</span><span class='line'>            &lt;/intent-filter&gt;
-</span><span class='line'>        &lt;/receiver&gt;
 </span><span class='line'>    &lt;/application&gt;
-</span><span class='line'>
 </span><span class='line'>&lt;/manifest&gt;</span></code></pre></td></tr></table></div></figure>
 
 
@@ -242,144 +196,138 @@
 <span class='line-number'>51</span>
 <span class='line-number'>52</span>
 <span class='line-number'>53</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.learnbroadcastreceiver;
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.counttime;
 </span><span class='line'>
-</span><span class='line'>import android.content.Intent;
-</span><span class='line'>import android.content.IntentFilter;
+</span><span class='line'>import android.os.Handler;
+</span><span class='line'>import android.os.Message;
 </span><span class='line'>import android.support.v7.app.ActionBarActivity;
 </span><span class='line'>import android.os.Bundle;
 </span><span class='line'>import android.view.View;
+</span><span class='line'>import android.widget.Button;
+</span><span class='line'>import android.widget.EditText;
+</span><span class='line'>import android.widget.TextView;
 </span><span class='line'>
-</span><span class='line'>public class MainActivity extends ActionBarActivity implements View.OnClickListener {
+</span><span class='line'>import java.util.Timer;
+</span><span class='line'>import java.util.TimerTask;
 </span><span class='line'>
-</span><span class='line'>    private MyReceiver receiver = null;
+</span><span class='line'>public class MainActivity extends ActionBarActivity implements View.OnClickListener{
+</span><span class='line'>
+</span><span class='line'>    private EditText inputTime;
+</span><span class='line'>    private TextView displayTime;
+</span><span class='line'>    private Button btnGetTime,btnStartTime,btnStopTime;
+</span><span class='line'>    private int countTime = 0;
+</span><span class='line'>    private Timer timer;
+</span><span class='line'>    private TimerTask timerTask;
 </span><span class='line'>
 </span><span class='line'>    @Override
 </span><span class='line'>    protected void onCreate(Bundle savedInstanceState) {
 </span><span class='line'>        super.onCreate(savedInstanceState);
 </span><span class='line'>        setContentView(R.layout.activity_main);
+</span><span class='line'>        initView();//初始化需要的View
+</span><span class='line'>    }
 </span><span class='line'>
-</span><span class='line'>        findViewById(R.id.btnSendMsg).setOnClickListener(this);
-</span><span class='line'>        findViewById(R.id.btnReg).setOnClickListener(this);
-</span><span class='line'>        findViewById(R.id.btnUnreg).setOnClickListener(this);
+</span><span class='line'>    /**
+</span><span class='line'>     * 所有View的初始化全部放在一个initView()方法中，让程序显得更简洁
+</span><span class='line'>     */
+</span><span class='line'>    private void initView(){
+</span><span class='line'>        inputTime = (EditText) findViewById(R.id.inputTime);
+</span><span class='line'>        displayTime = (TextView) findViewById(R.id.displayTime);
+</span><span class='line'>        btnGetTime = (Button) findViewById(R.id.btnGetTime);
+</span><span class='line'>        btnStartTime = (Button) findViewById(R.id.btnStartTime);
+</span><span class='line'>        btnStopTime = (Button) findViewById(R.id.btnStopTime);
+</span><span class='line'>
+</span><span class='line'>        btnGetTime.setOnClickListener(this);
+</span><span class='line'>        btnStartTime.setOnClickListener(this);
+</span><span class='line'>        btnStopTime.setOnClickListener(this);
 </span><span class='line'>    }
 </span><span class='line'>
 </span><span class='line'>    @Override
 </span><span class='line'>    public void onClick(View v) {
-</span><span class='line'>        switch(v.getId()){
-</span><span class='line'>            case R.id.btnSendMsg:
-</span><span class='line'>//                Intent i = new Intent(this,MyReceiver.class);
-</span><span class='line'>                //这时只能隐式Intent传递数据了
-</span><span class='line'>                Intent i = new Intent(MyReceiver.ACTION);
-</span><span class='line'>                i.putExtra("data","JACK的机器人");
-</span><span class='line'>//                sendBroadcast(i);//采用abortBroadcast();中断广播后，不能再采用此方式会报错，不能被中断
-</span><span class='line'>                //报错BroadcastReceiver trying to return result during a non-ordered broadcast后，采用方式
-</span><span class='line'>                sendOrderedBroadcast(i,null);
+</span><span class='line'>        switch (v.getId()){
+</span><span class='line'>            case R.id.btnGetTime:
+</span><span class='line'>                displayTime.setText(inputTime.getText().toString());//显示倒计时处显示输入的时间
+</span><span class='line'>                countTime = Integer.parseInt(inputTime.getText().toString());//获取输入的时间做计时准备
 </span><span class='line'>                break;
-</span><span class='line'>            case R.id.btnReg:
-</span><span class='line'>                //为避免重复注册操作，加入判断条件
-</span><span class='line'>                if(receiver == null){
-</span><span class='line'>                    //初始化receiver
-</span><span class='line'>                    receiver = new MyReceiver();
-</span><span class='line'>                    registerReceiver(receiver,new IntentFilter(MyReceiver.ACTION));
-</span><span class='line'>                    System.out.println("注册了接收器");
-</span><span class='line'>                }
+</span><span class='line'>            case R.id.btnStartTime:
+</span><span class='line'>                startTime();
 </span><span class='line'>                break;
-</span><span class='line'>            case R.id.btnUnreg:
-</span><span class='line'>                if(receiver != null){
-</span><span class='line'>                    unregisterReceiver(receiver);
-</span><span class='line'>                    receiver = null;
-</span><span class='line'>                    System.out.println("注消了接收器");
-</span><span class='line'>                }
+</span><span class='line'>            case R.id.btnStopTime:
+</span><span class='line'>                stopTime();
 </span><span class='line'>                break;
 </span><span class='line'>        }
 </span><span class='line'>    }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>3 MyReceiver.java(继承BroadcastReceiver)</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.learnbroadcastreceiver;
+</span><span class='line'>    //注意，这里导入的是android.os.Handler这个Handler
+</span><span class='line'>    private Handler countHandler = new Handler(){
+</span><span class='line'>        @Override
+</span><span class='line'>        public void handleMessage(Message msg) {
+</span><span class='line'>            super.handleMessage(msg);
+</span><span class='line'>            //由于setText()中只能传递字符串，而msg.arg1中传递的数据类型是int型的，需要转换为字符串类型
+</span><span class='line'>            displayTime.setText(msg.arg1+"");
+</span><span class='line'>            //再次启动计时器，进入循环
+</span><span class='line'>            startTime();
+</span><span class='line'>        }
+</span><span class='line'>    };
 </span><span class='line'>
-</span><span class='line'>import android.content.BroadcastReceiver;
-</span><span class='line'>import android.content.Context;
-</span><span class='line'>import android.content.Intent;
-</span><span class='line'>
-</span><span class='line'>public class MyReceiver extends BroadcastReceiver {
-</span><span class='line'>
-</span><span class='line'>    public static final String ACTION = "cn.loverobots.learnbroadcastreceiver.intent.action.MyReceiver";
-</span><span class='line'>
-</span><span class='line'>    public MyReceiver() {
+</span><span class='line'>    private void startTime(){
+</span><span class='line'>        timer = new Timer();
+</span><span class='line'>        timerTask = new TimerTask() {
+</span><span class='line'>            @Override
+</span><span class='line'>            public void run() {
+</span><span class='line'>                countTime--;
+</span><span class='line'>                Message message = countHandler.obtainMessage();//获取消息
+</span><span class='line'>                message.arg1 = countTime;
+</span><span class='line'>                countHandler.sendMessage(message);//发送消息
+</span><span class='line'>            }
+</span><span class='line'>        };
+</span><span class='line'>        //启动计时器
+</span><span class='line'>        timer.schedule(timerTask,1000);
 </span><span class='line'>    }
 </span><span class='line'>
-</span><span class='line'>    @Override
-</span><span class='line'>    public void onReceive(Context context, Intent intent) {
-</span><span class='line'>//        System.out.println("接收到了消息，消息的内容是："+intent.getStringExtra("data"));
-</span><span class='line'>        System.out.println("MyReceiver 接收到了消息");
-</span><span class='line'>        //中断广播可以让优先级比其低的receiver不再接收到消息
-</span><span class='line'>        abortBroadcast();
+</span><span class='line'>    private void stopTime(){
+</span><span class='line'>        timer.cancel();
 </span><span class='line'>    }
 </span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
 
 
-<h3>4 MyReceiver2.java(继承BroadcastReceiver)</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.learnbroadcastreceiver;
-</span><span class='line'>
-</span><span class='line'>import android.content.BroadcastReceiver;
-</span><span class='line'>import android.content.Context;
-</span><span class='line'>import android.content.Intent;
-</span><span class='line'>
-</span><span class='line'>public class MyReceiver2 extends BroadcastReceiver {
-</span><span class='line'>    
-</span><span class='line'>    public MyReceiver2() {
-</span><span class='line'>    }
-</span><span class='line'>
-</span><span class='line'>    @Override
-</span><span class='line'>    public void onReceive(Context context, Intent intent) {
-</span><span class='line'>        System.out.println("MyReceiver2 接收到了消息");
-</span><span class='line'>    }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>5 activity_main.xml</h3>
+<h3>3 activity_main.xml</h3>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -414,6 +362,11 @@
 <span class='line-number'>31</span>
 <span class='line-number'>32</span>
 <span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 </span><span class='line'>    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
 </span><span class='line'>    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
@@ -423,29 +376,34 @@
 </span><span class='line'>    android:orientation="vertical"
 </span><span class='line'>    tools:context=".MainActivity"&gt;
 </span><span class='line'>
+</span><span class='line'>    &lt;EditText
+</span><span class='line'>        android:layout_width="match_parent"
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:id="@+id/inputTime" /&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;Button
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:text="获取倒计时时间(秒)"
+</span><span class='line'>        android:id="@+id/btnGetTime" /&gt;
+</span><span class='line'>
 </span><span class='line'>    &lt;TextView
-</span><span class='line'>        android:text="@string/hello_world"
 </span><span class='line'>        android:layout_width="wrap_content"
-</span><span class='line'>        android:layout_height="wrap_content" /&gt;
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:text=""
+</span><span class='line'>        android:id="@+id/displayTime" /&gt;
 </span><span class='line'>
 </span><span class='line'>    &lt;Button
 </span><span class='line'>        android:layout_width="wrap_content"
 </span><span class='line'>        android:layout_height="wrap_content"
-</span><span class='line'>        android:text="发送消息"
-</span><span class='line'>        android:id="@+id/btnSendMsg" /&gt;
+</span><span class='line'>        android:text="开始计时"
+</span><span class='line'>        android:id="@+id/btnStartTime" /&gt;
 </span><span class='line'>
 </span><span class='line'>    &lt;Button
 </span><span class='line'>        android:layout_width="wrap_content"
 </span><span class='line'>        android:layout_height="wrap_content"
-</span><span class='line'>        android:text="注册接收器"
-</span><span class='line'>        android:id="@+id/btnReg" /&gt;
-</span><span class='line'>
-</span><span class='line'>    &lt;Button
-</span><span class='line'>        android:layout_width="wrap_content"
-</span><span class='line'>        android:layout_height="wrap_content"
-</span><span class='line'>        android:text="注销接收器"
-</span><span class='line'>        android:id="@+id/btnUnreg" /&gt;
-</span><span class='line'>
+</span><span class='line'>        android:text="停止计时"
+</span><span class='line'>        android:id="@+id/btnStopTime" /&gt;
 </span><span class='line'>&lt;/LinearLayout&gt;</span></code></pre></td></tr></table></div></figure>
 
 </div>
@@ -463,12 +421,12 @@
 
 
 
-<time class='entry-date' datetime='2015-07-20T00:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>12:39 am</span></time>
+<time class='entry-date' datetime='2015-07-21T20:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>21</span><span class='date-suffix'>st</span>, <span class='date-year'>2015</span></span> <span class='time'>8:39 pm</span></time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/android/'>android</a>, <a class='category' href='/blog/categories/android-basic/'>android_basic</a>, <a class='category' href='/blog/categories/broadcastreceiver/'>broadcastreceiver</a>, <a class='category' href='/blog/categories/you-xian-ji/'>优先级</a>
+    <a class='category' href='/blog/categories/actual-combat-project/'>actual_combat_project</a>, <a class='category' href='/blog/categories/android/'>android</a>
   
 </span>
 
@@ -484,10 +442,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2015/07/19/Dynamic%20registration%20and%20cancellation%20BroadcastReceiver/" title="Previous Post: 动态注册和注销BroadcastReceiver">&laquo; 动态注册和注销BroadcastReceiver</a>
+        <a class="basic-alignment left" href="/blog/2015/07/20/Android-authority-system-Add-permissions-for-basic-components/" title="Previous Post: Android的权限系统——为基本组件添加权限检查">&laquo; Android的权限系统——为基本组件添加权限检查</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2015/07/20/Android-log-system/" title="Next Post: Android日志系统">Android日志系统 &raquo;</a>
       
     </p>
   </footer>

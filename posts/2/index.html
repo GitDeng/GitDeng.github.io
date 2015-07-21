@@ -9,7 +9,7 @@
   <meta name="author" content="程序员笔记">
 
   
-  <meta name="description" content="绑定Service时，通过Binder方式进行数据传递，比通过启动Service的方式更方便也更高效。 示例代码 1 MainActivity（继承Activity，实现View.OnClickListener, ServiceConnection接口） 1
+  <meta name="description" content="通过回调机制实现。当内部数据发生改变时，通知外部进行数据修改。 示例代码 1 MainActivity（继承Activity，并实现View.OnClickListener, ServiceConnection） 1
 2
 3
 4
@@ -18,7 +18,14 @@
 7
 8
 9
-10 &hellip;">
+10
+11
+12
+13
+14
+15
+16
+17 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -69,12 +76,520 @@
   <li><a href="/blog/archives">标题总览</a></li>
   <li><a href="/blog/categories/basic-cognition">基本认识</a></li>
   <li><a href="/blog/categories/android-basic">Android基础知识</a></li>
+  <li><a href="/blog/categories/Actual-combat-project">Android实战项目</a></li>
 </ul>
 </nav>
   <div id="main">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/14/Service-is-bound-to-communicate-how-to-listen-to-the-internal-state-of-the-Service/">绑定Service进行通信（如何侦听Service的内部状态）</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-07-14T00:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>14</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>12:39 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>通过回调机制实现。当内部数据发生改变时，通知外部进行数据修改。</p>
+
+<h2>示例代码</h2>
+
+<h3>1 MainActivity（继承Activity，并实现View.OnClickListener, ServiceConnection）</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.connectservice;
+</span><span class='line'>
+</span><span class='line'>import android.content.ComponentName;
+</span><span class='line'>import android.content.Context;
+</span><span class='line'>import android.content.Intent;
+</span><span class='line'>import android.content.ServiceConnection;
+</span><span class='line'>import android.os.Handler;
+</span><span class='line'>import android.os.IBinder;
+</span><span class='line'>import android.os.Message;
+</span><span class='line'>import android.os.Bundle;
+</span><span class='line'>import android.support.v7.app.AppCompatActivity;
+</span><span class='line'>import android.view.View;
+</span><span class='line'>import android.widget.EditText;
+</span><span class='line'>import android.widget.TextView;
+</span><span class='line'>
+</span><span class='line'>public class MainActivity extends AppCompatActivity implements View.OnClickListener, ServiceConnection {
+</span><span class='line'>
+</span><span class='line'>  private EditText editText;
+</span><span class='line'>  private Intent intent;
+</span><span class='line'>  private MyService.Binder binder = null;
+</span><span class='line'>  //步骤1
+</span><span class='line'>  private TextView textViewOut;
+</span><span class='line'>
+</span><span class='line'>  @Override
+</span><span class='line'>  protected void onCreate(Bundle savedInstanceState) {
+</span><span class='line'>      super.onCreate(savedInstanceState);
+</span><span class='line'>      setContentView(R.layout.activity_main);
+</span><span class='line'>      editText = (EditText) findViewById(R.id.editText);
+</span><span class='line'>      textViewOut = (TextView) findViewById(R.id.textViewOut);
+</span><span class='line'>      findViewById(R.id.btnStartService).setOnClickListener(this);
+</span><span class='line'>      findViewById(R.id.btnStopService).setOnClickListener(this);
+</span><span class='line'>      findViewById(R.id.btnBindService).setOnClickListener(this);
+</span><span class='line'>      findViewById(R.id.btnUnbindService).setOnClickListener(this);
+</span><span class='line'>      findViewById(R.id.btnSyncData).setOnClickListener(this);
+</span><span class='line'>  }
+</span><span class='line'>
+</span><span class='line'>  @Override
+</span><span class='line'>  public void onClick(View v) {
+</span><span class='line'>      switch (v.getId()){
+</span><span class='line'>          case R.id.btnStartService:
+</span><span class='line'>              System.out.println("启动服务");
+</span><span class='line'>              intent = new Intent(this,MyService.class);
+</span><span class='line'>              //传递名为“etData”的字符串类型的数据
+</span><span class='line'>              intent.putExtra("etData", editText.getText().toString());
+</span><span class='line'>              startService(intent);
+</span><span class='line'>              break;
+</span><span class='line'>          case R.id.btnStopService:
+</span><span class='line'>              System.out.println("停止服务");
+</span><span class='line'>              stopService(new Intent(this,MyService.class));
+</span><span class='line'>              break;
+</span><span class='line'>          case R.id.btnBindService:
+</span><span class='line'>              bindService(new Intent(this,MyService.class),this, Context.BIND_AUTO_CREATE);
+</span><span class='line'>              break;
+</span><span class='line'>          case R.id.btnUnbindService:
+</span><span class='line'>              unbindService(this);
+</span><span class='line'>              break;
+</span><span class='line'>          case R.id.btnSyncData:
+</span><span class='line'>              if(binder!=null){
+</span><span class='line'>                  binder.setData(editText.getText().toString());
+</span><span class='line'>              }
+</span><span class='line'>              break;
+</span><span class='line'>      }
+</span><span class='line'>  }
+</span><span class='line'>
+</span><span class='line'>  @Override
+</span><span class='line'>  public void onServiceConnected(ComponentName name, IBinder service) {
+</span><span class='line'>      //接收来自MyService的Binder中的数据
+</span><span class='line'>      binder = (MyService.Binder) service;
+</span><span class='line'>      //步骤7
+</span><span class='line'>      binder.getService().setCallBack(new MyService.CallBack() {
+</span><span class='line'>          @Override
+</span><span class='line'>          public void onDataChange(String data) {
+</span><span class='line'>              //textViewOut.setText(data);
+</span><span class='line'>              //此处不能直接写,因为Android中有一个安全机制，即UI线程不允许其它辅线程直接修改UI线程的资源
+</span><span class='line'>              //步骤9
+</span><span class='line'>              Message msg = new Message();
+</span><span class='line'>              Bundle bundle = new Bundle();
+</span><span class='line'>              bundle.putString("data",data);
+</span><span class='line'>              msg.setData(bundle);
+</span><span class='line'>              handler.sendMessage(msg);
+</span><span class='line'>          }
+</span><span class='line'>      });
+</span><span class='line'>  }
+</span><span class='line'>
+</span><span class='line'>  @Override
+</span><span class='line'>  public void onServiceDisconnected(ComponentName name) {
+</span><span class='line'>
+</span><span class='line'>  }
+</span><span class='line'>  //步骤8
+</span><span class='line'>  private Handler handler = new Handler(){
+</span><span class='line'>      @Override
+</span><span class='line'>      public void handleMessage(Message msg) {
+</span><span class='line'>          super.handleMessage(msg);
+</span><span class='line'>          //步骤10
+</span><span class='line'>          textViewOut.setText(msg.getData().getString("data"));
+</span><span class='line'>      }
+</span><span class='line'>  };
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2 MyService(继承Service)</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.connectservice;
+</span><span class='line'>
+</span><span class='line'>import android.app.Service;
+</span><span class='line'>import android.content.Intent;
+</span><span class='line'>import android.os.IBinder;
+</span><span class='line'>
+</span><span class='line'>public class MyService extends Service {
+</span><span class='line'>  private static boolean ServiceRunning = false;
+</span><span class='line'>  private String etData = "默认文本";
+</span><span class='line'>  public MyService() {
+</span><span class='line'>  }
+</span><span class='line'>
+</span><span class='line'>  @Override
+</span><span class='line'>  public IBinder onBind(Intent intent) {
+</span><span class='line'>      return new Binder();
+</span><span class='line'>  }
+</span><span class='line'>  //创建一个Binder对象继承系统中的Binder类，并创建一个传递数据的方法setData
+</span><span class='line'>  public class Binder extends android.os.Binder{
+</span><span class='line'>      public void setData(String etData){
+</span><span class='line'>          MyService.this.etData = etData;
+</span><span class='line'>      }
+</span><span class='line'>      //步骤6
+</span><span class='line'>      public MyService getService(){
+</span><span class='line'>          return MyService.this;
+</span><span class='line'>      }
+</span><span class='line'>  }
+</span><span class='line'>
+</span><span class='line'>  @Override
+</span><span class='line'>  public int onStartCommand(Intent intent, int flags, int startId) {
+</span><span class='line'>      etData = intent.getStringExtra("etData");
+</span><span class='line'>      return super.onStartCommand(intent, flags, startId);
+</span><span class='line'>  }
+</span><span class='line'>
+</span><span class='line'>  @Override
+</span><span class='line'>  public void onCreate() {
+</span><span class='line'>      super.onCreate();
+</span><span class='line'>      System.out.println("服务创建");
+</span><span class='line'>      ServiceRunning = true;
+</span><span class='line'>      new Thread(){
+</span><span class='line'>          @Override
+</span><span class='line'>          public void run() {
+</span><span class='line'>              super.run();
+</span><span class='line'>              //步骤4
+</span><span class='line'>              int i = 0;
+</span><span class='line'>              while (ServiceRunning){
+</span><span class='line'>                  i++;
+</span><span class='line'>                  String str = i+"："+etData;
+</span><span class='line'>                  System.out.println(str);
+</span><span class='line'>                  //步骤5
+</span><span class='line'>                  if(callBack!=null){
+</span><span class='line'>                      callBack.onDataChange(str);
+</span><span class='line'>                  }
+</span><span class='line'>                  try {
+</span><span class='line'>                      sleep(1000);
+</span><span class='line'>                  } catch (InterruptedException e) {
+</span><span class='line'>                      e.printStackTrace();
+</span><span class='line'>                  }
+</span><span class='line'>              }
+</span><span class='line'>          }
+</span><span class='line'>      }.start();
+</span><span class='line'>  }
+</span><span class='line'>
+</span><span class='line'>  @Override
+</span><span class='line'>      public void onDestroy() {
+</span><span class='line'>      super.onDestroy();
+</span><span class='line'>      System.out.println("服务停止");
+</span><span class='line'>      ServiceRunning = false;
+</span><span class='line'>  }
+</span><span class='line'>  //步骤3
+</span><span class='line'>  private CallBack callBack = null;
+</span><span class='line'>
+</span><span class='line'>  public void setCallBack(CallBack callBack) {
+</span><span class='line'>      this.callBack = callBack;
+</span><span class='line'>  }
+</span><span class='line'>
+</span><span class='line'>  public CallBack getCallBack() {
+</span><span class='line'>      return callBack;
+</span><span class='line'>  }
+</span><span class='line'>  //步骤2
+</span><span class='line'>  public static interface CallBack{
+</span><span class='line'>      void onDataChange(String data);
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>3 activity_main.xml</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+</span><span class='line'>    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+</span><span class='line'>  android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+</span><span class='line'>  android:paddingRight="@dimen/activity_horizontal_margin"
+</span><span class='line'>  android:paddingTop="@dimen/activity_vertical_margin"
+</span><span class='line'>  android:paddingBottom="@dimen/activity_vertical_margin"
+</span><span class='line'>  android:orientation="vertical"
+</span><span class='line'>  tools:context=".MainActivity"&gt;
+</span><span class='line'>
+</span><span class='line'>  &lt;TextView
+</span><span class='line'>      android:layout_width="wrap_content"
+</span><span class='line'>      android:layout_height="wrap_content"
+</span><span class='line'>      android:text="内部输出至外部测试文本"
+</span><span class='line'>      android:id="@+id/textViewOut" /&gt;
+</span><span class='line'>
+</span><span class='line'>  &lt;EditText
+</span><span class='line'>      android:layout_width="match_parent"
+</span><span class='line'>      android:layout_height="wrap_content"
+</span><span class='line'>      android:text="默认文本"
+</span><span class='line'>      android:id="@+id/editText" /&gt;
+</span><span class='line'>
+</span><span class='line'>  &lt;Button
+</span><span class='line'>      android:layout_width="wrap_content"
+</span><span class='line'>      android:layout_height="wrap_content"
+</span><span class='line'>      android:text="启动服务"
+</span><span class='line'>      android:id="@+id/btnStartService" /&gt;
+</span><span class='line'>
+</span><span class='line'>  &lt;Button
+</span><span class='line'>      android:layout_width="wrap_content"
+</span><span class='line'>      android:layout_height="wrap_content"
+</span><span class='line'>      android:text="停止服务"
+</span><span class='line'>      android:id="@+id/btnStopService" /&gt;
+</span><span class='line'>
+</span><span class='line'>  &lt;Button
+</span><span class='line'>          android:layout_width="wrap_content"
+</span><span class='line'>      android:layout_height="wrap_content"
+</span><span class='line'>      android:text="绑定服务"
+</span><span class='line'>      android:id="@+id/btnBindService" /&gt;
+</span><span class='line'>
+</span><span class='line'>  &lt;Button
+</span><span class='line'>      android:layout_width="wrap_content"
+</span><span class='line'>      android:layout_height="wrap_content"
+</span><span class='line'>      android:text="解除绑定服务"
+</span><span class='line'>      android:id="@+id/btnUnbindService" /&gt;
+</span><span class='line'>
+</span><span class='line'>  &lt;Button
+</span><span class='line'>      android:layout_width="wrap_content"
+</span><span class='line'>      android:layout_height="wrap_content"
+</span><span class='line'>      android:text="同步数据"
+</span><span class='line'>      android:id="@+id/btnSyncData" /&gt;
+</span><span class='line'>&lt;/LinearLayout&gt;</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -2320,341 +2835,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/07/09/Activity-Android-startup-mode/">Android中Activity启动模式</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2015-07-09T12:39:20+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>9</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>12:39 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>Activity共分为四种启动模式</h1>
-
-<h2>启动模式可以在AndroidManifest.xml中进行配置</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-</span><span class='line'>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
-</span><span class='line'>    package="cn.loverobots.launchmode" &gt;
-</span><span class='line'>    &lt;application
-</span><span class='line'>        android:allowBackup="true"
-</span><span class='line'>        android:icon="@mipmap/ic_launcher"
-</span><span class='line'>        android:label="@string/app_name"
-</span><span class='line'>        android:theme="@style/AppTheme" &gt;
-</span><span class='line'>      &lt;!-- launchMode分为四种模式：standard,singleTop,singleTask,singleInstance --&gt;
-</span><span class='line'>        &lt;activity
-</span><span class='line'>            android:name=".MainActivity"
-</span><span class='line'>            android:label="@string/app_name"
-</span><span class='line'>            android:launchMode="singleInstance" &gt;
-</span><span class='line'>            &lt;intent-filter&gt;
-</span><span class='line'>                &lt;action android:name="android.intent.action.MAIN" /&gt;
-</span><span class='line'>                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
-</span><span class='line'>            &lt;/intent-filter&gt;
-</span><span class='line'>        &lt;/activity&gt;
-</span><span class='line'>        &lt;activity
-</span><span class='line'>            android:name=".BAty"
-</span><span class='line'>            android:label="@string/title_activity_baty"
-</span><span class='line'>            android:launchMode="singleInstance" &gt;
-</span><span class='line'>        &lt;/activity&gt;
-</span><span class='line'>    &lt;/application&gt;
-</span><span class='line'>&lt;/manifest&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<p>*同一个文件中的ID不能一样，不同文件之间的ID可以一样</p>
-
-<h3>1 Standard模式</h3>
-
-<p>即标准启动模式，每次启动当前Activity，都会创建新的实例。</p>
-
-<h3>2 SingleTop模式</h3>
-
-<p>如果当前Activity处于栈顶不会创建实例，如果当前Activity不处于栈顶，则会创建新的实例。</p>
-
-<h3>3 SingleTask模式</h3>
-
-<p>SingleTask启动模式下，只会创建一个当前Activity的实例A。当从此Activity实例打开另一个Activity实例B，并在B中打开最开始的Activity时，不会创建新实例，而会回到最开始的第一个A实例，再次按后退按钮则会直接退出当前程序。</p>
-
-<h3>4 SingleInstance模式</h3>
-
-<p>SingleInstance模式下，是独立的一个栈，即一个栈中只会存在一个Activity。</p>
-
-<h2>示 例</h2>
-
-<h3>1 MainActivity.java</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>private TextView tv;
-</span><span class='line'>
-</span><span class='line'>@Override
-</span><span class='line'>protected void onCreate(Bundle savedInstanceState) {
-</span><span class='line'>    super.onCreate(savedInstanceState);
-</span><span class='line'>    setContentView(R.layout.activity_main);
-</span><span class='line'>
-</span><span class='line'>    tv = (TextView) findViewById(R.id.tv);
-</span><span class='line'>    tv.setText(String.format("TaskID:%d\nCurrent Activity ID:%s",getTaskId(),toString()));
-</span><span class='line'>
-</span><span class='line'>    findViewById(R.id.btnMainActivity).setOnClickListener(new View.OnClickListener() {
-</span><span class='line'>        @Override
-</span><span class='line'>        public void onClick(View v) {
-</span><span class='line'>            startActivity(new Intent(MainActivity.this, MainActivity.class));
-</span><span class='line'>        }
-</span><span class='line'>    });
-</span><span class='line'>
-</span><span class='line'>    findViewById(R.id.btnBAty).setOnClickListener(new View.OnClickListener() {
-</span><span class='line'>        @Override
-</span><span class='line'>        public void onClick(View v) {
-</span><span class='line'>            startActivity(new Intent(MainActivity.this,BAty.class));
-</span><span class='line'>        }
-</span><span class='line'>    });
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>1 activity_main.xml</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-</span><span class='line'>    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-</span><span class='line'>    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
-</span><span class='line'>    android:paddingRight="@dimen/activity_horizontal_margin"
-</span><span class='line'>    android:paddingTop="@dimen/activity_vertical_margin"
-</span><span class='line'>    android:paddingBottom="@dimen/activity_vertical_margin"
-</span><span class='line'>    android:orientation="vertical"
-</span><span class='line'>    tools:context=".MainActivity"&gt;
-</span><span class='line'>
-</span><span class='line'>    &lt;TextView
-</span><span class='line'>        android:id="@+id/tv"
-</span><span class='line'>        android:text="@string/hello_world"
-</span><span class='line'>        android:layout_width="wrap_content"
-</span><span class='line'>        android:layout_height="wrap_content" /&gt;
-</span><span class='line'>
-</span><span class='line'>    &lt;Button
-</span><span class='line'>        android:textAllCaps="false"
-</span><span class='line'>        android:layout_width="wrap_content"
-</span><span class='line'>        android:layout_height="wrap_content"
-</span><span class='line'>        android:text="启动MainActivity"
-</span><span class='line'>        android:id="@+id/btnMainActivity" /&gt;
-</span><span class='line'>
-</span><span class='line'>    &lt;Button
-</span><span class='line'>        android:textAllCaps="false"
-</span><span class='line'>        android:layout_width="wrap_content"
-</span><span class='line'>        android:layout_height="wrap_content"
-</span><span class='line'>        android:text="启动BAty"
-</span><span class='line'>        android:id="@+id/btnBAty" /&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;/LinearLayout&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>2 BAty.java</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>private TextView tv;
-</span><span class='line'>
-</span><span class='line'>@Override
-</span><span class='line'>protected void onCreate(Bundle savedInstanceState) {
-</span><span class='line'>    super.onCreate(savedInstanceState);
-</span><span class='line'>    setContentView(R.layout.activity_baty);
-</span><span class='line'>
-</span><span class='line'>    tv = (TextView) findViewById(R.id.tv);
-</span><span class='line'>    tv.setText(String.format("TaskID:%d\nCurrent Activity ID:%s",getTaskId(),toString()));
-</span><span class='line'>
-</span><span class='line'>    findViewById(R.id.btnMainActivity).setOnClickListener(new View.OnClickListener() {
-</span><span class='line'>        @Override
-</span><span class='line'>        public void onClick(View v) {
-</span><span class='line'>            startActivity(new Intent(BAty.this, MainActivity.class));
-</span><span class='line'>        }
-</span><span class='line'>    });
-</span><span class='line'>
-</span><span class='line'>    findViewById(R.id.btnBAty).setOnClickListener(new View.OnClickListener() {
-</span><span class='line'>        @Override
-</span><span class='line'>        public void onClick(View v) {
-</span><span class='line'>            startActivity(new Intent(BAty.this, BAty.class));
-</span><span class='line'>        }
-</span><span class='line'>    });
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>2 activity_baty.xml</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-</span><span class='line'>    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-</span><span class='line'>    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
-</span><span class='line'>    android:paddingRight="@dimen/activity_horizontal_margin"
-</span><span class='line'>    android:paddingTop="@dimen/activity_vertical_margin"
-</span><span class='line'>    android:paddingBottom="@dimen/activity_vertical_margin"
-</span><span class='line'>    android:orientation="vertical"
-</span><span class='line'>    tools:context="cn.loverobots.launchmode.BAty"&gt;
-</span><span class='line'>
-</span><span class='line'>    &lt;TextView
-</span><span class='line'>        android:id="@+id/tv"
-</span><span class='line'>        android:text="@string/hello_world"
-</span><span class='line'>        android:layout_width="wrap_content"
-</span><span class='line'>        android:layout_height="wrap_content" /&gt;
-</span><span class='line'>
-</span><span class='line'>    &lt;Button
-</span><span class='line'>        android:textAllCaps="false"
-</span><span class='line'>        android:layout_width="wrap_content"
-</span><span class='line'>        android:layout_height="wrap_content"
-</span><span class='line'>        android:text="启动MainActivity"
-</span><span class='line'>        android:id="@+id/btnMainActivity" /&gt;
-</span><span class='line'>
-</span><span class='line'>    &lt;Button
-</span><span class='line'>        android:textAllCaps="false"
-</span><span class='line'>        android:layout_width="wrap_content"
-</span><span class='line'>        android:layout_height="wrap_content"
-</span><span class='line'>        android:text="启动BAty"
-</span><span class='line'>        android:id="@+id/btnBAty" /&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;/LinearLayout&gt;</span></code></pre></td></tr></table></div></figure>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; 前一页</a>
@@ -2672,6 +2852,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/07/21/Android-project-actual-combat-Countdown/">Android实战项目——倒计时</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/07/20/Android-authority-system-Add-permissions-for-basic-components/">Android的权限系统——为基本组件添加权限检查</a>
       </li>
     
@@ -2685,10 +2869,6 @@
     
       <li class="post">
         <a href="/blog/2015/07/20/Android-log-system/">Android日志系统</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/07/20/BroadcastReceiver-priority/">BroadcastReceiver的优先级</a>
       </li>
     
   </ul>

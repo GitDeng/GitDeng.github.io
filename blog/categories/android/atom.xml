@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android | 程序员笔记]]></title>
   <link href="http://gitdeng.github.io/blog/categories/android/atom.xml" rel="self"/>
   <link href="http://gitdeng.github.io/"/>
-  <updated>2015-07-20T23:08:02+08:00</updated>
+  <updated>2015-07-21T23:53:58+08:00</updated>
   <id>http://gitdeng.github.io/</id>
   <author>
     <name><![CDATA[程序员笔记]]></name>
@@ -12,6 +12,186 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Android实战项目——倒计时]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/21/Android-project-actual-combat-Countdown/"/>
+    <updated>2015-07-21T20:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/21/Android-project-actual-combat-Countdown</id>
+    <content type="html"><![CDATA[<h2>项目背景</h2>
+
+<p>在Android系统中UI操作并不是线程安全的，如果多个线程并发的去操作同一个组件，可能导致线程安全问题。为了解决这一个问题，Android 制定了一条规则：只允许 UI 线程来修改 UI 组件的属性等，也就是说必须单线程模型，这样导致如果在UI界面进行一个耗时较长的数据更新等就会形成程序假死现象，也就是ANR异常，如果20秒中没有完成程序就会强制关闭。所以比如另一个线程要修改UI组件的时候，就需要借助Handler消息机制了。</p>
+
+<h2>核心内容</h2>
+
+<p>1 UI布局<br/>
+2 Handler创建<br/>
+3 计时器创建<br/>
+4 逻辑实现</p>
+
+<h2>代码示例</h2>
+
+<h3>1 AndroidManifest.xml</h3>
+
+<pre><code>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="cn.loverobots.counttime" &gt;
+    &lt;application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" &gt;
+        &lt;activity
+            android:name=".MainActivity"
+            android:label="@string/app_name" &gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name="android.intent.action.MAIN" /&gt;
+
+                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/activity&gt;
+    &lt;/application&gt;
+&lt;/manifest&gt;
+</code></pre>
+
+<h3>2 MainActivity.java</h3>
+
+<pre><code>package cn.loverobots.counttime;
+
+import android.os.Handler;
+import android.os.Message;
+import android.support.v7.app.ActionBarActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
+public class MainActivity extends ActionBarActivity implements View.OnClickListener{
+
+    private EditText inputTime;
+    private TextView displayTime;
+    private Button btnGetTime,btnStartTime,btnStopTime;
+    private int countTime = 0;
+    private Timer timer;
+    private TimerTask timerTask;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        initView();//初始化需要的View
+    }
+
+    /**
+     * 所有View的初始化全部放在一个initView()方法中，让程序显得更简洁
+     */
+    private void initView(){
+        inputTime = (EditText) findViewById(R.id.inputTime);
+        displayTime = (TextView) findViewById(R.id.displayTime);
+        btnGetTime = (Button) findViewById(R.id.btnGetTime);
+        btnStartTime = (Button) findViewById(R.id.btnStartTime);
+        btnStopTime = (Button) findViewById(R.id.btnStopTime);
+
+        btnGetTime.setOnClickListener(this);
+        btnStartTime.setOnClickListener(this);
+        btnStopTime.setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.btnGetTime:
+                displayTime.setText(inputTime.getText().toString());//显示倒计时处显示输入的时间
+                countTime = Integer.parseInt(inputTime.getText().toString());//获取输入的时间做计时准备
+                break;
+            case R.id.btnStartTime:
+                startTime();
+                break;
+            case R.id.btnStopTime:
+                stopTime();
+                break;
+        }
+    }
+    //注意，这里导入的是android.os.Handler这个Handler
+    private Handler countHandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            //由于setText()中只能传递字符串，而msg.arg1中传递的数据类型是int型的，需要转换为字符串类型
+            displayTime.setText(msg.arg1+"");
+            //再次启动计时器，进入循环
+            startTime();
+        }
+    };
+
+    private void startTime(){
+        timer = new Timer();
+        timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                countTime--;
+                Message message = countHandler.obtainMessage();//获取消息
+                message.arg1 = countTime;
+                countHandler.sendMessage(message);//发送消息
+            }
+        };
+        //启动计时器
+        timer.schedule(timerTask,1000);
+    }
+
+    private void stopTime(){
+        timer.cancel();
+    }
+}
+</code></pre>
+
+<h3>3 activity_main.xml</h3>
+
+<pre><code>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    tools:context=".MainActivity"&gt;
+
+    &lt;EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/inputTime" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="获取倒计时时间(秒)"
+        android:id="@+id/btnGetTime" /&gt;
+
+    &lt;TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:id="@+id/displayTime" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="开始计时"
+        android:id="@+id/btnStartTime" /&gt;
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="停止计时"
+        android:id="@+id/btnStopTime" /&gt;
+&lt;/LinearLayout&gt;
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Android的权限系统——为基本组件添加权限检查]]></title>
@@ -380,209 +560,6 @@ public class MainActivity extends ActionBarActivity {
         Log.e("MSG","其他信息");
     }
 }
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[BroadcastReceiver的优先级]]></title>
-    <link href="http://gitdeng.github.io/blog/2015/07/20/BroadcastReceiver-priority/"/>
-    <updated>2015-07-20T00:39:20+08:00</updated>
-    <id>http://gitdeng.github.io/blog/2015/07/20/BroadcastReceiver-priority</id>
-    <content type="html"><![CDATA[<h2>使用简介</h2>
-
-<p>在AndroidManifest.xml文件中注册receiver时，可在过滤器中增加优先级设置(priority)，数字越大优先级越高，越早执行。
-<code>
-&lt;intent-filter android:priority="7"&gt;
-                &lt;action android:name="cn.loverobots.learnbroadcastreceiver.intent.action.MyReceiver"/&gt;
-&lt;/intent-filter&gt;
-</code></p>
-
-<h2>注意事项</h2>
-
-<p>采用abordBroadcast();方法进行广播中断时，不能采用sendBroadcast(new Intent);方式进行广播发送，会报错（BroadcastReceiver trying to return result during a non-ordered broadcast），且不会有中断广播效果。应该采用sendOrderedBroadcast(i,null);方式发送广播。</p>
-
-<h2>代码举例</h2>
-
-<h3>1 AndroidManifest.xml</h3>
-
-<pre><code>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="cn.loverobots.learnbroadcastreceiver" &gt;
-
-    &lt;application
-        android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:theme="@style/AppTheme" &gt;
-        &lt;activity
-            android:name=".MainActivity"
-            android:label="@string/app_name" &gt;
-            &lt;intent-filter&gt;
-                &lt;action android:name="android.intent.action.MAIN" /&gt;
-
-                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
-            &lt;/intent-filter&gt;
-        &lt;/activity&gt;
-
-        &lt;receiver
-            android:name=".MyReceiver2"
-            android:enabled="true"
-            android:exported="true"&gt;
-            &lt;intent-filter android:priority="7"&gt;
-                &lt;action android:name="cn.loverobots.learnbroadcastreceiver.intent.action.MyReceiver"/&gt;
-            &lt;/intent-filter&gt;
-        &lt;/receiver&gt;
-        &lt;receiver
-            android:name=".MyReceiver"
-            android:enabled="true"
-            android:exported="true"&gt;
-            &lt;intent-filter android:priority="8"&gt;
-                &lt;action android:name="cn.loverobots.learnbroadcastreceiver.intent.action.MyReceiver"/&gt;
-            &lt;/intent-filter&gt;
-        &lt;/receiver&gt;
-    &lt;/application&gt;
-
-&lt;/manifest&gt;
-</code></pre>
-
-<h3>2 MainActivity.java</h3>
-
-<pre><code>package cn.loverobots.learnbroadcastreceiver;
-
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
-import android.view.View;
-
-public class MainActivity extends ActionBarActivity implements View.OnClickListener {
-
-    private MyReceiver receiver = null;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        findViewById(R.id.btnSendMsg).setOnClickListener(this);
-        findViewById(R.id.btnReg).setOnClickListener(this);
-        findViewById(R.id.btnUnreg).setOnClickListener(this);
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch(v.getId()){
-            case R.id.btnSendMsg:
-//                Intent i = new Intent(this,MyReceiver.class);
-                //这时只能隐式Intent传递数据了
-                Intent i = new Intent(MyReceiver.ACTION);
-                i.putExtra("data","JACK的机器人");
-//                sendBroadcast(i);//采用abortBroadcast();中断广播后，不能再采用此方式会报错，不能被中断
-                //报错BroadcastReceiver trying to return result during a non-ordered broadcast后，采用方式
-                sendOrderedBroadcast(i,null);
-                break;
-            case R.id.btnReg:
-                //为避免重复注册操作，加入判断条件
-                if(receiver == null){
-                    //初始化receiver
-                    receiver = new MyReceiver();
-                    registerReceiver(receiver,new IntentFilter(MyReceiver.ACTION));
-                    System.out.println("注册了接收器");
-                }
-                break;
-            case R.id.btnUnreg:
-                if(receiver != null){
-                    unregisterReceiver(receiver);
-                    receiver = null;
-                    System.out.println("注消了接收器");
-                }
-                break;
-        }
-    }
-}
-</code></pre>
-
-<h3>3 MyReceiver.java(继承BroadcastReceiver)</h3>
-
-<pre><code>package cn.loverobots.learnbroadcastreceiver;
-
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-
-public class MyReceiver extends BroadcastReceiver {
-
-    public static final String ACTION = "cn.loverobots.learnbroadcastreceiver.intent.action.MyReceiver";
-
-    public MyReceiver() {
-    }
-
-    @Override
-    public void onReceive(Context context, Intent intent) {
-//        System.out.println("接收到了消息，消息的内容是："+intent.getStringExtra("data"));
-        System.out.println("MyReceiver 接收到了消息");
-        //中断广播可以让优先级比其低的receiver不再接收到消息
-        abortBroadcast();
-    }
-}
-</code></pre>
-
-<h3>4 MyReceiver2.java(继承BroadcastReceiver)</h3>
-
-<pre><code>package cn.loverobots.learnbroadcastreceiver;
-
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-
-public class MyReceiver2 extends BroadcastReceiver {
-
-    public MyReceiver2() {
-    }
-
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        System.out.println("MyReceiver2 接收到了消息");
-    }
-}
-</code></pre>
-
-<h3>5 activity_main.xml</h3>
-
-<pre><code>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:orientation="vertical"
-    tools:context=".MainActivity"&gt;
-
-    &lt;TextView
-        android:text="@string/hello_world"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" /&gt;
-
-    &lt;Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="发送消息"
-        android:id="@+id/btnSendMsg" /&gt;
-
-    &lt;Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="注册接收器"
-        android:id="@+id/btnReg" /&gt;
-
-    &lt;Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="注销接收器"
-        android:id="@+id/btnUnreg" /&gt;
-
-&lt;/LinearLayout&gt;
 </code></pre>
 ]]></content>
   </entry>

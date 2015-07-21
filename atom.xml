@@ -4,7 +4,7 @@
   <title><![CDATA[程序员笔记]]></title>
   <link href="http://gitdeng.github.io/atom.xml" rel="self"/>
   <link href="http://gitdeng.github.io/"/>
-  <updated>2015-07-20T23:08:02+08:00</updated>
+  <updated>2015-07-21T23:53:58+08:00</updated>
   <id>http://gitdeng.github.io/</id>
   <author>
     <name><![CDATA[程序员笔记]]></name>
@@ -12,6 +12,334 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Android实战项目——倒计时]]></title>
+    <link href="http://gitdeng.github.io/blog/2015/07/21/Android-project-actual-combat-Countdown/"/>
+    <updated>2015-07-21T20:39:20+08:00</updated>
+    <id>http://gitdeng.github.io/blog/2015/07/21/Android-project-actual-combat-Countdown</id>
+    <content type="html"><![CDATA[<h2>项目背景</h2>
+
+<p>在Android系统中UI操作并不是线程安全的，如果多个线程并发的去操作同一个组件，可能导致线程安全问题。为了解决这一个问题，Android 制定了一条规则：只允许 UI 线程来修改 UI 组件的属性等，也就是说必须单线程模型，这样导致如果在UI界面进行一个耗时较长的数据更新等就会形成程序假死现象，也就是ANR异常，如果20秒中没有完成程序就会强制关闭。所以比如另一个线程要修改UI组件的时候，就需要借助Handler消息机制了。</p>
+
+<h2>核心内容</h2>
+
+<p>1 UI布局<br/>
+2 Handler创建<br/>
+3 计时器创建<br/>
+4 逻辑实现</p>
+
+<h2>代码示例</h2>
+
+<h3>1 AndroidManifest.xml</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+</span><span class='line'>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+</span><span class='line'>    package="cn.loverobots.counttime" &gt;
+</span><span class='line'>    &lt;application
+</span><span class='line'>        android:allowBackup="true"
+</span><span class='line'>        android:icon="@mipmap/ic_launcher"
+</span><span class='line'>        android:label="@string/app_name"
+</span><span class='line'>        android:theme="@style/AppTheme" &gt;
+</span><span class='line'>        &lt;activity
+</span><span class='line'>            android:name=".MainActivity"
+</span><span class='line'>            android:label="@string/app_name" &gt;
+</span><span class='line'>            &lt;intent-filter&gt;
+</span><span class='line'>                &lt;action android:name="android.intent.action.MAIN" /&gt;
+</span><span class='line'>
+</span><span class='line'>                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+</span><span class='line'>            &lt;/intent-filter&gt;
+</span><span class='line'>        &lt;/activity&gt;
+</span><span class='line'>    &lt;/application&gt;
+</span><span class='line'>&lt;/manifest&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2 MainActivity.java</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package cn.loverobots.counttime;
+</span><span class='line'>
+</span><span class='line'>import android.os.Handler;
+</span><span class='line'>import android.os.Message;
+</span><span class='line'>import android.support.v7.app.ActionBarActivity;
+</span><span class='line'>import android.os.Bundle;
+</span><span class='line'>import android.view.View;
+</span><span class='line'>import android.widget.Button;
+</span><span class='line'>import android.widget.EditText;
+</span><span class='line'>import android.widget.TextView;
+</span><span class='line'>
+</span><span class='line'>import java.util.Timer;
+</span><span class='line'>import java.util.TimerTask;
+</span><span class='line'>
+</span><span class='line'>public class MainActivity extends ActionBarActivity implements View.OnClickListener{
+</span><span class='line'>
+</span><span class='line'>    private EditText inputTime;
+</span><span class='line'>    private TextView displayTime;
+</span><span class='line'>    private Button btnGetTime,btnStartTime,btnStopTime;
+</span><span class='line'>    private int countTime = 0;
+</span><span class='line'>    private Timer timer;
+</span><span class='line'>    private TimerTask timerTask;
+</span><span class='line'>
+</span><span class='line'>    @Override
+</span><span class='line'>    protected void onCreate(Bundle savedInstanceState) {
+</span><span class='line'>        super.onCreate(savedInstanceState);
+</span><span class='line'>        setContentView(R.layout.activity_main);
+</span><span class='line'>        initView();//初始化需要的View
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    /**
+</span><span class='line'>     * 所有View的初始化全部放在一个initView()方法中，让程序显得更简洁
+</span><span class='line'>     */
+</span><span class='line'>    private void initView(){
+</span><span class='line'>        inputTime = (EditText) findViewById(R.id.inputTime);
+</span><span class='line'>        displayTime = (TextView) findViewById(R.id.displayTime);
+</span><span class='line'>        btnGetTime = (Button) findViewById(R.id.btnGetTime);
+</span><span class='line'>        btnStartTime = (Button) findViewById(R.id.btnStartTime);
+</span><span class='line'>        btnStopTime = (Button) findViewById(R.id.btnStopTime);
+</span><span class='line'>
+</span><span class='line'>        btnGetTime.setOnClickListener(this);
+</span><span class='line'>        btnStartTime.setOnClickListener(this);
+</span><span class='line'>        btnStopTime.setOnClickListener(this);
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    @Override
+</span><span class='line'>    public void onClick(View v) {
+</span><span class='line'>        switch (v.getId()){
+</span><span class='line'>            case R.id.btnGetTime:
+</span><span class='line'>                displayTime.setText(inputTime.getText().toString());//显示倒计时处显示输入的时间
+</span><span class='line'>                countTime = Integer.parseInt(inputTime.getText().toString());//获取输入的时间做计时准备
+</span><span class='line'>                break;
+</span><span class='line'>            case R.id.btnStartTime:
+</span><span class='line'>                startTime();
+</span><span class='line'>                break;
+</span><span class='line'>            case R.id.btnStopTime:
+</span><span class='line'>                stopTime();
+</span><span class='line'>                break;
+</span><span class='line'>        }
+</span><span class='line'>    }
+</span><span class='line'>    //注意，这里导入的是android.os.Handler这个Handler
+</span><span class='line'>    private Handler countHandler = new Handler(){
+</span><span class='line'>        @Override
+</span><span class='line'>        public void handleMessage(Message msg) {
+</span><span class='line'>            super.handleMessage(msg);
+</span><span class='line'>            //由于setText()中只能传递字符串，而msg.arg1中传递的数据类型是int型的，需要转换为字符串类型
+</span><span class='line'>            displayTime.setText(msg.arg1+"");
+</span><span class='line'>            //再次启动计时器，进入循环
+</span><span class='line'>            startTime();
+</span><span class='line'>        }
+</span><span class='line'>    };
+</span><span class='line'>
+</span><span class='line'>    private void startTime(){
+</span><span class='line'>        timer = new Timer();
+</span><span class='line'>        timerTask = new TimerTask() {
+</span><span class='line'>            @Override
+</span><span class='line'>            public void run() {
+</span><span class='line'>                countTime--;
+</span><span class='line'>                Message message = countHandler.obtainMessage();//获取消息
+</span><span class='line'>                message.arg1 = countTime;
+</span><span class='line'>                countHandler.sendMessage(message);//发送消息
+</span><span class='line'>            }
+</span><span class='line'>        };
+</span><span class='line'>        //启动计时器
+</span><span class='line'>        timer.schedule(timerTask,1000);
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    private void stopTime(){
+</span><span class='line'>        timer.cancel();
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>3 activity_main.xml</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+</span><span class='line'>    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+</span><span class='line'>    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+</span><span class='line'>    android:paddingRight="@dimen/activity_horizontal_margin"
+</span><span class='line'>    android:paddingTop="@dimen/activity_vertical_margin"
+</span><span class='line'>    android:paddingBottom="@dimen/activity_vertical_margin"
+</span><span class='line'>    android:orientation="vertical"
+</span><span class='line'>    tools:context=".MainActivity"&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;EditText
+</span><span class='line'>        android:layout_width="match_parent"
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:id="@+id/inputTime" /&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;Button
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:text="获取倒计时时间(秒)"
+</span><span class='line'>        android:id="@+id/btnGetTime" /&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;TextView
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:text=""
+</span><span class='line'>        android:id="@+id/displayTime" /&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;Button
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:text="开始计时"
+</span><span class='line'>        android:id="@+id/btnStartTime" /&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;Button
+</span><span class='line'>        android:layout_width="wrap_content"
+</span><span class='line'>        android:layout_height="wrap_content"
+</span><span class='line'>        android:text="停止计时"
+</span><span class='line'>        android:id="@+id/btnStopTime" /&gt;
+</span><span class='line'>&lt;/LinearLayout&gt;</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Android的权限系统——为基本组件添加权限检查]]></title>
@@ -5019,321 +5347,6 @@
 </span><span class='line'>        android:layout_height="wrap_content"
 </span><span class='line'>        android:text="启动MyAty"
 </span><span class='line'>        android:id="@+id/btnStartMyAty" /&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;/LinearLayout&gt;</span></code></pre></td></tr></table></div></figure>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android中Activity启动模式]]></title>
-    <link href="http://gitdeng.github.io/blog/2015/07/09/Activity-Android-startup-mode/"/>
-    <updated>2015-07-09T12:39:20+08:00</updated>
-    <id>http://gitdeng.github.io/blog/2015/07/09/Activity-Android-startup-mode</id>
-    <content type="html"><![CDATA[<h1>Activity共分为四种启动模式</h1>
-
-<h2>启动模式可以在AndroidManifest.xml中进行配置</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-</span><span class='line'>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
-</span><span class='line'>    package="cn.loverobots.launchmode" &gt;
-</span><span class='line'>    &lt;application
-</span><span class='line'>        android:allowBackup="true"
-</span><span class='line'>        android:icon="@mipmap/ic_launcher"
-</span><span class='line'>        android:label="@string/app_name"
-</span><span class='line'>        android:theme="@style/AppTheme" &gt;
-</span><span class='line'>      &lt;!-- launchMode分为四种模式：standard,singleTop,singleTask,singleInstance --&gt;
-</span><span class='line'>        &lt;activity
-</span><span class='line'>            android:name=".MainActivity"
-</span><span class='line'>            android:label="@string/app_name"
-</span><span class='line'>            android:launchMode="singleInstance" &gt;
-</span><span class='line'>            &lt;intent-filter&gt;
-</span><span class='line'>                &lt;action android:name="android.intent.action.MAIN" /&gt;
-</span><span class='line'>                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
-</span><span class='line'>            &lt;/intent-filter&gt;
-</span><span class='line'>        &lt;/activity&gt;
-</span><span class='line'>        &lt;activity
-</span><span class='line'>            android:name=".BAty"
-</span><span class='line'>            android:label="@string/title_activity_baty"
-</span><span class='line'>            android:launchMode="singleInstance" &gt;
-</span><span class='line'>        &lt;/activity&gt;
-</span><span class='line'>    &lt;/application&gt;
-</span><span class='line'>&lt;/manifest&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<p>*同一个文件中的ID不能一样，不同文件之间的ID可以一样</p>
-
-<h3>1 Standard模式</h3>
-
-<p>即标准启动模式，每次启动当前Activity，都会创建新的实例。</p>
-
-<h3>2 SingleTop模式</h3>
-
-<p>如果当前Activity处于栈顶不会创建实例，如果当前Activity不处于栈顶，则会创建新的实例。</p>
-
-<h3>3 SingleTask模式</h3>
-
-<p>SingleTask启动模式下，只会创建一个当前Activity的实例A。当从此Activity实例打开另一个Activity实例B，并在B中打开最开始的Activity时，不会创建新实例，而会回到最开始的第一个A实例，再次按后退按钮则会直接退出当前程序。</p>
-
-<h3>4 SingleInstance模式</h3>
-
-<p>SingleInstance模式下，是独立的一个栈，即一个栈中只会存在一个Activity。</p>
-
-<h2>示 例</h2>
-
-<h3>1 MainActivity.java</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>private TextView tv;
-</span><span class='line'>
-</span><span class='line'>@Override
-</span><span class='line'>protected void onCreate(Bundle savedInstanceState) {
-</span><span class='line'>    super.onCreate(savedInstanceState);
-</span><span class='line'>    setContentView(R.layout.activity_main);
-</span><span class='line'>
-</span><span class='line'>    tv = (TextView) findViewById(R.id.tv);
-</span><span class='line'>    tv.setText(String.format("TaskID:%d\nCurrent Activity ID:%s",getTaskId(),toString()));
-</span><span class='line'>
-</span><span class='line'>    findViewById(R.id.btnMainActivity).setOnClickListener(new View.OnClickListener() {
-</span><span class='line'>        @Override
-</span><span class='line'>        public void onClick(View v) {
-</span><span class='line'>            startActivity(new Intent(MainActivity.this, MainActivity.class));
-</span><span class='line'>        }
-</span><span class='line'>    });
-</span><span class='line'>
-</span><span class='line'>    findViewById(R.id.btnBAty).setOnClickListener(new View.OnClickListener() {
-</span><span class='line'>        @Override
-</span><span class='line'>        public void onClick(View v) {
-</span><span class='line'>            startActivity(new Intent(MainActivity.this,BAty.class));
-</span><span class='line'>        }
-</span><span class='line'>    });
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>1 activity_main.xml</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-</span><span class='line'>    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-</span><span class='line'>    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
-</span><span class='line'>    android:paddingRight="@dimen/activity_horizontal_margin"
-</span><span class='line'>    android:paddingTop="@dimen/activity_vertical_margin"
-</span><span class='line'>    android:paddingBottom="@dimen/activity_vertical_margin"
-</span><span class='line'>    android:orientation="vertical"
-</span><span class='line'>    tools:context=".MainActivity"&gt;
-</span><span class='line'>
-</span><span class='line'>    &lt;TextView
-</span><span class='line'>        android:id="@+id/tv"
-</span><span class='line'>        android:text="@string/hello_world"
-</span><span class='line'>        android:layout_width="wrap_content"
-</span><span class='line'>        android:layout_height="wrap_content" /&gt;
-</span><span class='line'>
-</span><span class='line'>    &lt;Button
-</span><span class='line'>        android:textAllCaps="false"
-</span><span class='line'>        android:layout_width="wrap_content"
-</span><span class='line'>        android:layout_height="wrap_content"
-</span><span class='line'>        android:text="启动MainActivity"
-</span><span class='line'>        android:id="@+id/btnMainActivity" /&gt;
-</span><span class='line'>
-</span><span class='line'>    &lt;Button
-</span><span class='line'>        android:textAllCaps="false"
-</span><span class='line'>        android:layout_width="wrap_content"
-</span><span class='line'>        android:layout_height="wrap_content"
-</span><span class='line'>        android:text="启动BAty"
-</span><span class='line'>        android:id="@+id/btnBAty" /&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;/LinearLayout&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>2 BAty.java</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>private TextView tv;
-</span><span class='line'>
-</span><span class='line'>@Override
-</span><span class='line'>protected void onCreate(Bundle savedInstanceState) {
-</span><span class='line'>    super.onCreate(savedInstanceState);
-</span><span class='line'>    setContentView(R.layout.activity_baty);
-</span><span class='line'>
-</span><span class='line'>    tv = (TextView) findViewById(R.id.tv);
-</span><span class='line'>    tv.setText(String.format("TaskID:%d\nCurrent Activity ID:%s",getTaskId(),toString()));
-</span><span class='line'>
-</span><span class='line'>    findViewById(R.id.btnMainActivity).setOnClickListener(new View.OnClickListener() {
-</span><span class='line'>        @Override
-</span><span class='line'>        public void onClick(View v) {
-</span><span class='line'>            startActivity(new Intent(BAty.this, MainActivity.class));
-</span><span class='line'>        }
-</span><span class='line'>    });
-</span><span class='line'>
-</span><span class='line'>    findViewById(R.id.btnBAty).setOnClickListener(new View.OnClickListener() {
-</span><span class='line'>        @Override
-</span><span class='line'>        public void onClick(View v) {
-</span><span class='line'>            startActivity(new Intent(BAty.this, BAty.class));
-</span><span class='line'>        }
-</span><span class='line'>    });
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>2 activity_baty.xml</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-</span><span class='line'>    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-</span><span class='line'>    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
-</span><span class='line'>    android:paddingRight="@dimen/activity_horizontal_margin"
-</span><span class='line'>    android:paddingTop="@dimen/activity_vertical_margin"
-</span><span class='line'>    android:paddingBottom="@dimen/activity_vertical_margin"
-</span><span class='line'>    android:orientation="vertical"
-</span><span class='line'>    tools:context="cn.loverobots.launchmode.BAty"&gt;
-</span><span class='line'>
-</span><span class='line'>    &lt;TextView
-</span><span class='line'>        android:id="@+id/tv"
-</span><span class='line'>        android:text="@string/hello_world"
-</span><span class='line'>        android:layout_width="wrap_content"
-</span><span class='line'>        android:layout_height="wrap_content" /&gt;
-</span><span class='line'>
-</span><span class='line'>    &lt;Button
-</span><span class='line'>        android:textAllCaps="false"
-</span><span class='line'>        android:layout_width="wrap_content"
-</span><span class='line'>        android:layout_height="wrap_content"
-</span><span class='line'>        android:text="启动MainActivity"
-</span><span class='line'>        android:id="@+id/btnMainActivity" /&gt;
-</span><span class='line'>
-</span><span class='line'>    &lt;Button
-</span><span class='line'>        android:textAllCaps="false"
-</span><span class='line'>        android:layout_width="wrap_content"
-</span><span class='line'>        android:layout_height="wrap_content"
-</span><span class='line'>        android:text="启动BAty"
-</span><span class='line'>        android:id="@+id/btnBAty" /&gt;
 </span><span class='line'>
 </span><span class='line'>&lt;/LinearLayout&gt;</span></code></pre></td></tr></table></div></figure>
 
